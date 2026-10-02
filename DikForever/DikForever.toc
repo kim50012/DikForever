@@ -1,0 +1,80 @@
+## Interface: 16001
+## Title: DikForever
+## Notes: 개인용 통합 관리 도구
+## Author: dik
+## Version: 0.1.0
+## SavedVariables: DikForeverDB
+## IconTexture: Interface\Icons\INV_Misc_Book_09
+## AddonCompartmentFunc: DikForever_OnAddonCompartmentClick
+
+Locales\koKR.lua
+Core\Events.lua
+Core\Compat.lua
+Core\Format.lua
+Core\Database.lua
+Core\Modules.lua
+Core\Characters.lua
+Core\InfoText.lua
+Core\TooltipLines.lua
+Core\Search.lua
+Core\Serialize.lua
+Core\ActionBlock.lua
+Core\Core.lua
+UI\Theme.lua
+UI\Widgets.lua
+UI\MainFrame.lua
+UI\HomePage.lua
+UI\SettingsPage.lua
+UI\Display.lua
+UI\Tooltip.lua
+Modules\Alts\Alts.lua
+Modules\Alts\AltsPage.lua
+Modules\Leveling\Leveling.lua
+Modules\Leveling\LevelingPage.lua
+Modules\Chores\Chores.lua
+Modules\Chores\ChoresPage.lua
+Modules\Gold\Gold.lua
+Modules\Gold\GoldPage.lua
+Modules\Lockouts\Lockouts.lua
+Modules\Lockouts\LockoutsPage.lua
+Modules\Chat\Chat.lua
+Modules\Chat\ChatDisplay.lua
+Modules\InfoBar\InfoBar.lua
+Modules\InfoBar\InfoBarDisplay.lua
+Modules\Inventory\Inventory.lua
+Modules\Inventory\InventoryPage.lua
+Modules\QuestTracker\QuestTracker.lua
+Modules\QuestTracker\QuestTrackerDisplay.lua
+Modules\DamageMeter\DamageMeter.lua
+Modules\DamageMeter\DamageMeterDisplay.lua
+Modules\Shopping\Shopping.lua
+Modules\Shopping\ShoppingPage.lua
+Modules\Lfg\Lfg.lua
+Modules\Lfg\LfgPage.lua
+Modules\Progress\Progress.lua
+Modules\Progress\ProgressPage.lua
+Modules\StatsMinimap\StatsMinimap.lua
+Modules\StatsMinimap\StatsMinimapDisplay.lua
+Modules\CombatHud\CombatHud.lua
+Modules\CombatHud\CombatHudSecure.lua
+Modules\CombatHud\CombatHudDisplay.lua
+Modules\CombatHud\CombatHudCast.lua
+Modules\CombatHud\CombatHudActionBar.lua
+Modules\Threat\Threat.lua
+Modules\Threat\ThreatDisplay.lua
+Modules\AggroMeter\AggroMeter.lua
+Modules\AggroMeter\AggroMeterDisplay.lua
+Modules\Range\Range.lua
+Modules\Range\RangeDisplay.lua
+Modules\Transmog\Transmog.lua
+Modules\HideFrames\HideFrames.lua
+Modules\HideFrames\HideFramesSecure.lua
+Modules\Transfer\Transfer.lua
+Modules\Transfer\TransferPage.lua
+Modules\ItemLevel\ItemLevel.lua
+Modules\ItemLevel\ItemLevelDisplay.lua
+Modules\BagIcons\BagIcons.lua
+Modules\BagIcons\BagIconsDisplay.lua
+Modules\TooltipTweaks\TooltipTweaks.lua
+Modules\TooltipTweaks\TooltipTweaksDisplay.lua
+Modules\PartyQuest\PartyQuest.lua
