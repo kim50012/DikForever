@@ -855,6 +855,37 @@ function ns.Transfer.GetErrorText(errCode)
     return L[key]
 end
 
+-- 로그아웃 시 배포 프리셋 기록, dik, 2026-10-02
+local function SaveDistPreset()
+    if not ns.db or ns.IsDatabaseNewer() or IsAreaNewer() then
+        return
+    end
+    local ok, text = xpcall(function()
+        return ns.Transfer.Export({ settings = true, layout = true, editMode = true })
+    end, geterrorhandler())
+    if not ok or type(text) ~= "string" then
+        return
+    end
+    local area = ns.GetModuleData(MODULE_ID)
+    if area.version == nil then
+        area.version = AREA_VERSION
+    end
+    area.distPreset = { created = time(), text = text }
+end
+
+-- 로그아웃 수집 프레임 생성, dik, 2026-10-02
+local function InitializeTracking()
+    if not ns.HasAPI("CreateFrame") then
+        return
+    end
+    local frame = CreateFrame("Frame")
+    local ok = pcall(frame.RegisterEvent, frame, "PLAYER_LOGOUT")
+    if not ok then
+        return
+    end
+    frame:SetScript("OnEvent", SaveDistPreset)
+end
+
 -- 설정 이전 모듈 등록, dik, 2026-10-02
 ns.RegisterModule({
     id = MODULE_ID,
@@ -863,4 +894,5 @@ ns.RegisterModule({
     category = "feature",
     order = 100,
     settings = {},
+    OnInitialize = InitializeTracking,
 })
