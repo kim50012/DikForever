@@ -760,16 +760,8 @@ local function MakeCheckbox(parent, part, checked, onChanged)
     end)
 end
 
--- 설정 이전 페이지 생성, dik, 2026-10-02
-function module.CreatePage(_, parent)
-    if page then
-        return page
-    end
-    page = CreateFrame("Frame", nil, parent)
-    local widgets = ns.Widgets
-    scroll, content = widgets.CreateScrollArea(page)
-    content:SetHeight(1)
-
+-- 내보내기 영역 생성(upvalue 60개 한도 분할), dik, 2026-10-03
+local function CreateExportSection(widgets)
     exportHeader = widgets.CreateSectionHeader(content, L.TRANSFER_EXPORT_TITLE)
     for i = 1, #PARTS do
         exportCbs[PARTS[i]] = MakeCheckbox(content, PARTS[i], exportChecked, UpdateButtons)
@@ -784,8 +776,11 @@ function module.CreatePage(_, parent)
     exportHint = widgets.CreateLabel(content, "FONT_SMALL", "TEXT_DIM")
     exportCounts = widgets.CreateLabel(content, "FONT_SMALL", "TEXT")
     exportCounts:SetWordWrap(true)
+end
 
-    importHeader = widgets.CreateSectionHeader(content, L.TRANSFER_IMPORT_TITLE)
+-- 가져오기 영역 생성, dik, 2026-10-03
+local function CreateImportSection(widgets)
+    importHeader =widgets.CreateSectionHeader(content, L.TRANSFER_IMPORT_TITLE)
     pasteHint = widgets.CreateLabel(content, "FONT_SMALL", "TEXT_DIM")
     pasteHint:SetWordWrap(true)
     pasteHint:SetText(L.TRANSFER_PASTE_HINT)
@@ -807,6 +802,10 @@ function module.CreatePage(_, parent)
     applyBtn = widgets.CreateButton(content, L.TRANSFER_BTN_APPLY, OnApplyClick)
     FitApplyButton()
     widgets.SetTooltip(applyBtn, L.TRANSFER_BTN_APPLY, L.TIP_TRANSFER_APPLY)
+end
+
+-- 레이아웃 간이 영역 생성, dik, 2026-10-03
+local function CreateQuickSection(widgets)
     if ns.IsModuleEnabled("layouts") and ns.Layouts then
         quickHeader = widgets.CreateSectionHeader(content, L.LAYOUTS_SECTION)
         quickDrop = widgets.CreateDropdown(content, {
@@ -842,7 +841,11 @@ function module.CreatePage(_, parent)
         widgets.SetTooltip(quickReloadBtn, L.LAYOUTS_BTN_RELOAD, L.TIP_LAYOUTS_RELOAD)
         quickReloadBtn:Hide()
     end
-    layoutTitle = widgets.CreateLabel(content, "FONT_BODY", "ACCENT")
+end
+
+-- 편집 모드 공유·되돌리기 영역 생성, dik, 2026-10-03
+local function CreateShareSection(widgets)
+    layoutTitle =widgets.CreateLabel(content, "FONT_BODY", "ACCENT")
     layoutTitle:SetText(L.TRANSFER_PART_EDITMODE)
     shareArea = widgets.CreateTextArea(content, { readOnly = true, height = SHARE_AREA_H })
     shareHint = widgets.CreateLabel(content, "FONT_SMALL", "TEXT_DIM")
@@ -856,6 +859,23 @@ function module.CreatePage(_, parent)
     resultLabel:SetWordWrap(true)
     guardLabel = widgets.CreateLabel(content, "FONT_SMALL", "DANGER")
     guardLabel:SetWordWrap(true)
+end
+
+-- 설정 이전 페이지 생성, dik, 2026-10-02
+-- 구역별 생성 함수로 분할, dik, 2026-10-03
+function module.CreatePage(_, parent)
+    if page then
+        return page
+    end
+    page = CreateFrame("Frame", nil, parent)
+    local widgets = ns.Widgets
+    scroll, content = widgets.CreateScrollArea(page)
+    content:SetHeight(1)
+
+    CreateExportSection(widgets)
+    CreateImportSection(widgets)
+    CreateQuickSection(widgets)
+    CreateShareSection(widgets)
 
     if InCombatLockdown and InCombatLockdown() then
         inCombat = true
