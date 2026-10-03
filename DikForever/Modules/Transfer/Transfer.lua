@@ -19,6 +19,8 @@ local ANCHORS = {
 }
 local WINDOW_FIELDS = { "point", "relativePoint", "x", "y", "width", "height" }
 local QUIET = { quiet = true }
+-- 수집·적용 제외 scope 집합, dik, 2026-10-03
+local EXCLUDED_SCOPES = { transfer = true, layouts = true }
 local ERROR_KEYS = {
     ["E-LEN"] = "TRANSFER_ERR_LEN",
     ["E-FMT"] = "TRANSFER_ERR_FMT",
@@ -138,7 +140,8 @@ local function CollectSettings()
         for i = 1, #list do
             local id = list[i].id
             local store = settings.modules[id]
-            if id ~= MODULE_ID and type(store) == "table" then
+            -- 제외 scope 집합 조회, dik, 2026-10-03
+            if not EXCLUDED_SCOPES[id] and type(store) == "table" then
                 local defs = ns.GetSettingDefs(id)
                 local picked
                 for j = 1, #defs do
@@ -399,7 +402,8 @@ local function PlanSettings(data)
         for id, store in pairs(data.modules) do
             if type(store) ~= "table" then
                 skipped = skipped + 1
-            elseif type(id) ~= "string" or id == MODULE_ID or not ns.GetModule(id) then
+            -- 제외 scope 집합 조회, dik, 2026-10-03
+            elseif type(id) ~= "string" or EXCLUDED_SCOPES[id] or not ns.GetModule(id) then
                 skipped = skipped + math.max(1, CountKeys(store))
             else
                 for key, v in pairs(store) do
@@ -763,7 +767,8 @@ local function Finish(result, summaryText)
 end
 
 -- 적용(백업 후), dik, 2026-10-02
-function ns.Transfer.Apply(preview, partsSet)
+-- opts: replaceHud·summary 지원, dik, 2026-10-03
+function ns.Transfer.Apply(preview, partsSet, opts)
     local blocked = CheckWritable()
     if blocked then
         return nil, blocked
@@ -792,8 +797,11 @@ function ns.Transfer.Apply(preview, partsSet)
     area.version = AREA_VERSION
     area.backup = { created = time(), parts = names, data = data }
 
-    local result = RunParts(parts, active)
-    Finish(result, L.TRANSFER_SUMMARY)
+    -- opts 있을 때만 HUD 교체·요약 문장 대체, dik, 2026-10-03
+    local isOpts = type(opts) == "table"
+    local summary = isOpts and type(opts.summary) == "string" and opts.summary or L.TRANSFER_SUMMARY
+    local result = RunParts(parts, active, isOpts and opts.replaceHud == true or nil)
+    Finish(result, summary)
     return result
 end
 
@@ -818,7 +826,8 @@ function ns.Transfer.HasBackup()
 end
 
 -- 되돌리기, dik, 2026-10-02
-function ns.Transfer.Undo()
+-- opts.summary 지원, dik, 2026-10-03
+function ns.Transfer.Undo(opts)
     local blocked = CheckWritable()
     if blocked then
         return nil, blocked
@@ -845,7 +854,10 @@ function ns.Transfer.Undo()
     local result = RunParts(payload.parts, active, true)
     local area = ns.GetModuleData(MODULE_ID)
     area.backup = nil
-    Finish(result, L.TRANSFER_UNDO_SUMMARY)
+    -- opts.summary 있으면 요약 문장 대체, dik, 2026-10-03
+    local summary = type(opts) == "table" and type(opts.summary) == "string" and opts.summary
+        or L.TRANSFER_UNDO_SUMMARY
+    Finish(result, summary)
     return result
 end
 

@@ -35,6 +35,8 @@ SLASH_DIKFOREVER2 = "/dikforever"
 -- 슬래시 명령 처리, dik, 2026-09-30
 SlashCmdList.DIKFOREVER = function(msg)
     local cmd = strtrim(msg or "")
+    -- 레이아웃 명령 첫 단어 분리, dik, 2026-10-03
+    local first, rest = cmd:match("^(%S+)%s*(.-)$")
     if cmd == "" then
         ns.Fire("TOGGLE_MAIN")
     elseif cmd == L.SLASH_CMD_SETTINGS then
@@ -52,6 +54,21 @@ SlashCmdList.DIKFOREVER = function(msg)
     -- 설정 이전 슬래시 분기 추가, dik, 2026-10-02
     elseif cmd == L.SLASH_CMD_TRANSFER then
         ns.Fire("OPEN_PAGE", "transfer")
+    -- 레이아웃 슬래시 분기 추가, dik, 2026-10-03
+    elseif first == L.SLASH_CMD_LAYOUTS then
+        if not ns.Layouts then
+            ns.Print(L.LAYOUTS_ERR_DISABLED)
+        elseif rest == "" then
+            ns.Fire("OPEN_PAGE", "layouts")
+        elseif rest:match("^[1-5]$") then
+            local n = tonumber(rest)
+            local result, err = ns.Layouts.Load(n, { fromSlash = true })
+            if not result then
+                ns.Print(ns.Layouts.GetErrorText(err, n))
+            end
+        else
+            ns.Print(L.LAYOUTS_SLASH_USAGE)
+        end
     else
         PrintHelp()
     end

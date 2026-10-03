@@ -71,6 +71,8 @@ Modules\HideFrames\HideFrames.lua
 Modules\HideFrames\HideFramesSecure.lua
 Modules\Transfer\Transfer.lua
 Modules\Transfer\TransferPage.lua
+Modules\Layouts\Layouts.lua
+Modules\Layouts\LayoutsPage.lua
 Modules\ItemLevel\ItemLevel.lua
 Modules\ItemLevel\ItemLevelDisplay.lua
 Modules\BagIcons\BagIcons.lua
