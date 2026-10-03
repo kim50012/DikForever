@@ -82,7 +82,8 @@ local function Layout()
     icon:SetSize(inner, inner)
 
     bar:ClearAllPoints()
-    bar:SetPoint("LEFT", icon, "RIGHT", Theme.GAP / 4, 0)
+    -- 시전 막대 본문 기준 앵커(secret 아이콘 의존 제거), dik, 2026-10-03
+    bar:SetPoint("LEFT", body, "LEFT", 1 + inner + Theme.GAP / 4, 0)
     bar:SetPoint("RIGHT", body, "RIGHT", -1, 0)
     bar:SetHeight(inner)
 
