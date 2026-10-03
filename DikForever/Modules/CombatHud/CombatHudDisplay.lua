@@ -431,13 +431,17 @@ local function ShowAuraTooltip(uf, icon)
         return false
     end
     GameTooltip:SetOwner(icon.frame, "ANCHOR_BOTTOMRIGHT")
-    local ok = xpcall(function()
-        GameTooltip:SetUnitAura(uf.unit, icon.auraIndex, icon.auraFilter)
-    end, geterrorhandler())
+    -- secret 접근 거부는 이번 툴팁만 생략, dik, 2026-10-03
+    local ok, err = pcall(GameTooltip.SetUnitAura, GameTooltip, uf.unit, icon.auraIndex, icon.auraFilter)
     if ok then
         GameTooltip:Show()
         return true
     end
+    if ns.CombatHud.IsSecretAuraError(err) then
+        GameTooltip:Hide()
+        return false
+    end
+    geterrorhandler()(err)
     -- 실패 시 전체 아이콘 마우스 통과(O1), dik, 2026-10-02
     tooltipOk = false
     GameTooltip:Hide()

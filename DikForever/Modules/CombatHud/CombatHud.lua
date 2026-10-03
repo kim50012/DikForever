@@ -357,6 +357,24 @@ function ns.CombatHud.BuildDebuffFilter(onlyMine)
     return "HARMFUL"
 end
 
+-- 오라 secret 접근 거부 오류 판정, dik, 2026-10-03
+function ns.CombatHud.IsSecretAuraError(err)
+    return type(err) == "string" and string.find(err, "secret", 1, true) ~= nil
+end
+
+-- 오라 1개 조회(secret 거부는 조용히 "secret"), dik, 2026-10-03
+local function ReadAuraAt(unit, index, filter)
+    local ok, aura = pcall(C_UnitAuras.GetAuraDataByIndex, unit, index, filter)
+    if ok then
+        return aura, nil
+    end
+    if ns.CombatHud.IsSecretAuraError(aura) then
+        return nil, "secret"
+    end
+    geterrorhandler()(aura)
+    return nil, "error"
+end
+
 -- 디버프 목록 조회 어댑터(AuraData 무복사), dik, 2026-10-01
 function ns.CombatHud.ReadDebuffs(unit, filter, max)
     if failed then
@@ -369,9 +387,12 @@ function ns.CombatHud.ReadDebuffs(unit, filter, max)
     if not IsFinite(max) then
         return list, "ok"
     end
+    -- secret 접근 거부는 목록 끝으로 처리, dik, 2026-10-03
     for i = 1, math.floor(max) do
-        local ok, aura = xpcall(function() return C_UnitAuras.GetAuraDataByIndex(unit, i, filter) end, geterrorhandler())
-        if not ok then
+        local aura, status = ReadAuraAt(unit, i, filter)
+        if status == "secret" then
+            return list, "secret"
+        elseif status then
             failed = true
             return list, "error"
         end
@@ -413,9 +434,12 @@ function ns.CombatHud.ReadBuffs(unit, max, hidePermanent)
     end
     local limit = math.floor(max)
     local filter = ns.CombatHud.BuildBuffFilter()
+    -- secret 접근 거부는 목록 끝으로 처리, dik, 2026-10-03
     for i = 1, ns.CombatHud.AURA_SCAN_MAX do
-        local ok, aura = xpcall(function() return C_UnitAuras.GetAuraDataByIndex(unit, i, filter) end, geterrorhandler())
-        if not ok then
+        local aura, status = ReadAuraAt(unit, i, filter)
+        if status == "secret" then
+            return list, "secret", indices
+        elseif status then
             failed = true
             return list, "error", indices
         end

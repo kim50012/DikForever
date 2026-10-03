@@ -6,8 +6,9 @@ ns.HideFrames = ns.HideFrames or {}
 
 ns.HideFrames.MODULE_ID = "hideFrames"
 ns.HideFrames.REAPPLY_MAX = 5
+-- 플레이어 묶음 투명화 방식 지정(taint 회피), dik, 2026-10-03
 ns.HideFrames.GROUPS = {
-    { key = "player", names = { "PlayerFrame" } },
+    { key = "player", names = { "PlayerFrame" }, mode = "alpha" },
     { key = "target", names = { "TargetFrame" } },
     { key = "focus", names = { "FocusFrame" } },
     { key = "party", names = { "PartyFrame", "CompactPartyFrame" } },

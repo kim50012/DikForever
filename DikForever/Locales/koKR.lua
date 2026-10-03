@@ -27,6 +27,8 @@ ns.L = {
         -- 레이아웃 도움말 줄 추가, dik, 2026-10-03
         "/dikf 레이아웃 — 레이아웃 저장·불러오기 페이지 열기",
         "/dikf 레이아웃 1~5 — 그 칸의 레이아웃 바로 불러오기",
+        -- 버전 도움말 줄 추가, dik, 2026-10-03
+        "/dikf 버전 — 설치된 DikForever 버전 보기",
         "/dikf 도움말 — 명령어 목록",
     },
     MSG_FONT_FALLBACK = "글꼴 파일을 불러오지 못해 기본 글꼴을 씁니다",
@@ -59,6 +61,8 @@ ns.L = {
     -- 관리창 이동 모드 버튼 추가, dik, 2026-10-01
     BUTTON_MOVE_MODE = "창 이동",
     HOME_VERSION = "버전 %s",
+    -- 빌드 해시 포함 버전 표시, dik, 2026-10-03
+    HOME_VERSION_BUILD = "버전 %s (%s)",
     HOME_CHARACTER = "%s - %s",
     HOME_MODULES = "모듈",
     STATUS_ENABLED = "사용 중",
@@ -1084,6 +1088,11 @@ ns.L = {
     MODULE_LAYOUTS_DESC = "현재 설정과 창 배치를 칸 5개에 저장해 두고 불러옵니다",
     SLASH_CMD_LAYOUTS = "레이아웃",
     LAYOUTS_SLASH_USAGE = "사용법: /dikf 레이아웃 1~5",
+    -- 버전 슬래시 명령 문구 추가, dik, 2026-10-03
+    SLASH_CMD_VERSION = "버전",
+    VERSION_LINE = "DikForever %s",
+    VERSION_LINE_BUILD = "DikForever %s (%s)",
+    VERSION_UNKNOWN = "버전 정보를 읽지 못했습니다",
     LAYOUTS_HINT = "현재 설정과 창 배치(HUD·관리창 위치)를 저장합니다. 쇼핑 목표·파티 모집 키워드·편집 모드는 담지 않습니다",
     LAYOUTS_SECTION = "레이아웃",
     LAYOUTS_SLOT_DEFAULT = "레이아웃 %d",

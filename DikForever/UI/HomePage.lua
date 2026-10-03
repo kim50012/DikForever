@@ -176,12 +176,18 @@ local function CreateHomePage(_, parent)
     widgets.title:SetText("DikForever")
 
     widgets.version = ns.Widgets.CreateLabel(content, "FONT_NUMBER", "TEXT_DIM")
-    local version
-    if C_AddOns and C_AddOns.GetAddOnMetadata then
+    local version, build
+    -- 빌드 해시 표시 추가, dik, 2026-10-03
+    if ns.HasAPI("C_AddOns.GetAddOnMetadata") then
         version = C_AddOns.GetAddOnMetadata(addonName, "Version")
+        build = C_AddOns.GetAddOnMetadata(addonName, "X-Build")
     end
     if version and version ~= "" then
-        widgets.version:SetText(string.format(L.HOME_VERSION, version))
+        if build and build ~= "" then
+            widgets.version:SetText(string.format(L.HOME_VERSION_BUILD, version, build))
+        else
+            widgets.version:SetText(string.format(L.HOME_VERSION, version))
+        end
         widgets.version:Show()
     else
         widgets.version:Hide()

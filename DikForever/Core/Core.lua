@@ -69,6 +69,20 @@ SlashCmdList.DIKFOREVER = function(msg)
         else
             ns.Print(L.LAYOUTS_SLASH_USAGE)
         end
+    -- 버전 슬래시 분기 추가, dik, 2026-10-03
+    elseif cmd == L.SLASH_CMD_VERSION then
+        local version, build
+        if ns.HasAPI("C_AddOns.GetAddOnMetadata") then
+            version = C_AddOns.GetAddOnMetadata(addonName, "Version")
+            build = C_AddOns.GetAddOnMetadata(addonName, "X-Build")
+        end
+        if type(version) ~= "string" or version == "" then
+            ns.Print(L.VERSION_UNKNOWN)
+        elseif type(build) == "string" and build ~= "" then
+            ns.Print(L.VERSION_LINE_BUILD:format(version, build))
+        else
+            ns.Print(L.VERSION_LINE:format(version))
+        end
     else
         PrintHelp()
     end

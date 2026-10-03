@@ -16,6 +16,8 @@ local holder = nil
 local eventFrame = nil
 local hiddenList = {}
 local hiddenSet = {}
+-- 프레임별 숨김 방식 기록, dik, 2026-10-03
+local hiddenMode = {}
 local reapplyCounts = {}
 local stoppedSet = {}
 local partialList = {}
@@ -31,10 +33,16 @@ function ns.HideFramesSecure.CanTouch()
 end
 
 -- 프레임을 숨김 보관 프레임 아래로 이동, dik, 2026-10-01
-function ns.HideFramesSecure.HideFrame(frame)
+-- 투명화 방식(alpha) 분기 추가, dik, 2026-10-03
+function ns.HideFramesSecure.HideFrame(frame, mode)
     if not ns.HideFramesSecure.CanTouch() then return nil end
     if type(frame) ~= "table" then
         return false
+    end
+    if mode == "alpha" then
+        frame:SetAlpha(0)
+        frame:EnableMouse(false)
+        return true
     end
     if not holder then
         holder = CreateFrame("Frame", nil, UIParent)
@@ -47,6 +55,14 @@ end
 -- 부모가 보관 프레임인지 판정, dik, 2026-10-01
 function ns.HideFramesSecure.IsHolder(parent)
     return holder ~= nil and parent == holder
+end
+
+-- 방식별 숨김 유지 여부 판정, dik, 2026-10-03
+function ns.HideFramesSecure.IsStillHidden(frame, mode)
+    if mode == "alpha" then
+        return frame:GetAlpha() == 0 and not frame:IsMouseEnabled()
+    end
+    return ns.HideFramesSecure.IsHolder(frame:GetParent())
 end
 
 -- 활성·지원 모듈 여부, dik, 2026-10-01
@@ -95,8 +111,10 @@ local function HideGroups()
             local found, missing = ns.HideFrames.ResolveGroup(group)
             for _, name in ipairs(found) do
                 local f = ns.Display.Find(name)
-                if type(f) == "table" and not hiddenSet[f] and ns.HideFramesSecure.HideFrame(f) == true then
+                -- 묶음 숨김 방식 전달, dik, 2026-10-03
+                if type(f) == "table" and not hiddenSet[f] and ns.HideFramesSecure.HideFrame(f, group.mode) == true then
                     hiddenSet[f] = true
+                    hiddenMode[f] = group.mode
                     hiddenList[#hiddenList + 1] = f
                 end
             end
@@ -136,11 +154,13 @@ local function Reapply()
     if not ns.HideFramesSecure.CanTouch() then
         return
     end
+    -- 방식별 유지 판정·재적용, dik, 2026-10-03
     for _, f in ipairs(hiddenList) do
-        if not stoppedSet[f] and not ns.HideFramesSecure.IsHolder(f:GetParent()) then
+        local mode = hiddenMode[f]
+        if not stoppedSet[f] and not ns.HideFramesSecure.IsStillHidden(f, mode) then
             local count = reapplyCounts[f] or 0
             if count < ns.HideFrames.REAPPLY_MAX then
-                if ns.HideFramesSecure.HideFrame(f) == true then
+                if ns.HideFramesSecure.HideFrame(f, mode) == true then
                     reapplyCounts[f] = count + 1
                 end
             else
