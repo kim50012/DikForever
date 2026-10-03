@@ -58,6 +58,8 @@ local FONT_DEFS = {
     FONT_SMALL = { face = Theme.FACE_BODY, delta = -1 },
     -- 바 위 글자용 외곽선 토큰 추가, dik, 2026-10-02
     FONT_SMALL_OUTLINE = { face = Theme.FACE_BODY, delta = -1, flags = "OUTLINE", shadow = true },
+    -- 오라 아이콘 시간·중첩 글자 토큰 추가, dik, 2026-10-03
+    FONT_TINY_OUTLINE = { face = Theme.FACE_BODY, delta = -3, flags = "OUTLINE", shadow = true },
     FONT_BODY_OUTLINE = { face = Theme.FACE_BODY, delta = 0, flags = "OUTLINE", shadow = true },
 }
 

@@ -62,6 +62,10 @@ local sinceAura = AURA_MIN
 local pollAcc = 0
 -- 대상의 대상 주기 누적값 추가, dik, 2026-10-01
 local totAcc = 0
+-- 오라 시간 글자 주기·누적·기본 숫자 숨김 성공 여부(WFA-045), dik, 2026-10-03
+local AURA_TIME_TICK = 0.2
+local sinceAuraTime = 0
+local hideCountdownOk = false
 -- 오라 툴팁 지원 여부(T1), dik, 2026-10-02
 local tooltipOk = false
 
@@ -476,8 +480,17 @@ local function GetIcon(uf, index)
     local top = CreateFrame("Frame", nil, icon.frame)
     top:SetAllPoints(icon.frame)
     top:SetFrameLevel(icon.cd:GetFrameLevel() + 1)
-    icon.count = Widgets.CreateLabel(top, "FONT_SMALL", "TEXT")
-    icon.count:SetPoint("BOTTOMRIGHT", top, "BOTTOMRIGHT", -1, 1)
+    -- 기본 카운트다운 숨김·시간 글자 추가(WFA-045), dik, 2026-10-03
+    if type(icon.cd.SetHideCountdownNumbers) == "function" then
+        icon.cd:SetHideCountdownNumbers(true)
+        hideCountdownOk = true
+    end
+    icon.time = Widgets.CreateLabel(top, "FONT_TINY_OUTLINE", "TEXT")
+    icon.time:SetPoint("BOTTOM", top, "BOTTOM", 0, 1)
+    icon.time:SetJustifyH("CENTER")
+    icon.time:Hide()
+    icon.count = Widgets.CreateLabel(top, "FONT_TINY_OUTLINE", "TEXT")
+    icon.count:SetPoint("TOPRIGHT", top, "TOPRIGHT", -1, -1)
     icon.count:SetJustifyH("RIGHT")
     icon.frame:Hide()
     uf.icons[index] = icon
@@ -493,6 +506,23 @@ local function IsUsableIcon(icon)
         return true
     end
     return type(icon) == "string" and icon ~= ""
+end
+
+-- 아이콘 남은 시간 글자 갱신(WFA-045), dik, 2026-10-03
+local function UpdateIconTime(icon, now)
+    local text = nil
+    if hideCountdownOk and type(icon.expires) == "number" and type(ns.CombatHud.AuraTimeText) == "function" then
+        text = ns.CombatHud.AuraTimeText(icon.expires - now)
+    end
+    if text ~= icon.timeText then
+        if text then
+            icon.time:SetText(text)
+            icon.time:Show()
+        else
+            icon.time:Hide()
+        end
+        icon.timeText = text
+    end
 end
 
 -- 오라 아이콘 1개 채우기(A9), dik, 2026-10-02
@@ -512,12 +542,18 @@ local function FillAuraIcon(uf, count, aura, kind, auraIndex, auraFilter, border
         widget.count:Hide()
     end
     local start, duration = C.AuraCooldown(aura.duration, aura.expirationTime)
+    -- 남은 시간 글자용 만료 시각 저장(WFA-045), dik, 2026-10-03
     if start then
         widget.cd:SetCooldown(start, duration)
         widget.cd:Show()
+        widget.expires = start + duration
     else
         widget.cd:Hide()
+        widget.expires = nil
     end
+    -- 재사용 시 시간 글자 강제 갱신, dik, 2026-10-03
+    widget.timeText = false
+    UpdateIconTime(widget, GetTime())
     widget.frame:Show()
 end
 
@@ -1132,6 +1168,23 @@ local function OnUpdate(_, elapsed)
                 dirty[frameList[i].key].aura = false
             end
             sinceAura = 0
+        end
+    end
+    -- 오라 남은 시간 글자 0.2초 주기 갱신(WFA-045), dik, 2026-10-03
+    sinceAuraTime = sinceAuraTime + elapsed
+    if sinceAuraTime >= AURA_TIME_TICK then
+        sinceAuraTime = 0
+        local now = GetTime()
+        for i = 1, #frameList do
+            local uf = frameList[i]
+            if uf.hud:IsVisible() then
+                for k = 1, uf.iconCount do
+                    local icon = uf.icons[k]
+                    if icon then
+                        UpdateIconTime(icon, now)
+                    end
+                end
+            end
         end
     end
     ProcessRetry()

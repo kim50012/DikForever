@@ -460,6 +460,20 @@ function ns.CombatHud.AuraCooldown(duration, expirationTime)
     return nil
 end
 
+-- 오라 남은 시간 짧은 표기, dik, 2026-10-03
+function ns.CombatHud.AuraTimeText(remaining)
+    if ns.IsSecret(remaining) or not IsFinite(remaining) or remaining <= 0 then
+        return nil
+    end
+    if remaining >= 3600 then
+        return string.format(L.AURA_TIME_HOURS, math.min(99, math.floor(remaining / 3600)))
+    end
+    if remaining >= 60 then
+        return string.format(L.AURA_TIME_MINUTES, math.floor(remaining / 60))
+    end
+    return tostring(math.max(1, math.floor(remaining)))
+end
+
 -- 디버프 아이콘 배치 좌표, dik, 2026-10-01
 function ns.CombatHud.LayoutIcons(count, width, size, gap)
     local positions = {}
