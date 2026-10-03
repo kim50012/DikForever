@@ -15,6 +15,11 @@ local active = false
 local minimapPartialShown = false
 local minimapFirstDone = false
 local maskApplied = false
+-- 미니맵 크기 세션 값 추가, dik, 2026-10-03
+local sessionSize = nil
+local baseW = nil
+local baseH = nil
+local sizeNoticeShown = false
 local borderFrame = nil
 local eventFrame = nil
 
@@ -79,6 +84,23 @@ local function ApplyMinimap()
         elseif borderFrame then
             borderFrame:Hide()
         end
+
+        -- 미니맵 크기 세션 값 적용, dik, 2026-10-03
+        if baseW == nil then
+            baseW = m:GetWidth()
+            baseH = m:GetHeight()
+        end
+        if sessionSize ~= ns.MinimapSkin.SIZE_DEFAULT then
+            local w = ns.MinimapSkin.CalcSize(baseW, sessionSize)
+            local h = ns.MinimapSkin.CalcSize(baseH, sessionSize)
+            if not (w == baseW and h == baseH) then
+                if type(w) == "number" and type(h) == "number" and type(m.SetSize) == "function" then
+                    m:SetSize(w, h)
+                else
+                    missing[#missing + 1] = "Minimap:SetSize"
+                end
+            end
+        end
     end
 
     if not minimapFirstDone then
@@ -111,6 +133,8 @@ local function Initialize()
     if not (ns.IsModuleEnabled("minimapSkin") and ns.IsModuleSupported("minimapSkin")) then
         return
     end
+    -- 크기 세션 값 고정, dik, 2026-10-03
+    sessionSize = Get("size")
     active = true
     CreateEventFrame()
     RequestMinimap()
@@ -118,7 +142,18 @@ end
 
 -- 설정 변경 처리, dik, 2026-10-03
 local function OnSettingChanged(scope, key, value)
-    if not active or scope ~= "minimapSkin" or key ~= "shape" then
+    -- 크기 변경 /reload 안내 추가, dik, 2026-10-03
+    if not active or scope ~= "minimapSkin" then
+        return
+    end
+    if key == "size" then
+        if value ~= sessionSize and not sizeNoticeShown then
+            sizeNoticeShown = true
+            ns.Print(L.MSG_MINIMAP_SIZE_RELOAD)
+        end
+        return
+    end
+    if key ~= "shape" then
         return
     end
     if value == "square" then

@@ -15,6 +15,28 @@ ns.MinimapSkin.MINIMAP_GROUPS = {
     { key = "zoneText", kind = "font", candidates = { { "MinimapZoneText" } } },
 }
 
+-- 미니맵 크기 퍼센트 범위 상수, dik, 2026-10-03
+ns.MinimapSkin.SIZE_MIN = 100
+ns.MinimapSkin.SIZE_MAX = 200
+ns.MinimapSkin.SIZE_STEP = 5
+ns.MinimapSkin.SIZE_DEFAULT = 100
+
+-- 기준 크기와 퍼센트로 미니맵 크기 계산, dik, 2026-10-03
+function ns.MinimapSkin.CalcSize(base, percent)
+    if type(base) ~= "number" or base ~= base or base <= 0 then
+        return nil
+    end
+    if type(percent) ~= "number" or percent ~= percent then
+        percent = 100
+    end
+    if percent < ns.MinimapSkin.SIZE_MIN then
+        percent = ns.MinimapSkin.SIZE_MIN
+    elseif percent > ns.MinimapSkin.SIZE_MAX then
+        percent = ns.MinimapSkin.SIZE_MAX
+    end
+    return math.floor(base * percent / 100 + 0.5)
+end
+
 -- 능력치 패널 설정에서 미니맵 설정 이관, dik, 2026-10-03
 function ns.MinimapSkin.MigrateLegacy(settingsModules)
     if type(settingsModules) ~= "table" then
@@ -54,6 +76,10 @@ ns.RegisterModule({
               { value = "round", text = L.MINIMAP_SHAPE_ROUND },
           },
           default = "square" },
+        { key = "size", type = "slider", label = L.SETTING_MINIMAP_SIZE,
+          tooltip = L.SETTING_MINIMAP_SIZE_TIP,
+          min = ns.MinimapSkin.SIZE_MIN, max = ns.MinimapSkin.SIZE_MAX,
+          step = ns.MinimapSkin.SIZE_STEP, default = ns.MinimapSkin.SIZE_DEFAULT },
     },
     OnInitialize = function()
         if ns.IsDatabaseNewer() then

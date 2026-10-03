@@ -739,6 +739,10 @@ ns.L = {
     SETTING_STATS_BG_ALPHA_TIP = "능력치 패널 배경의 불투명도",
     SETTING_MINIMAP_SHAPE = "미니맵 모양",
     SETTING_MINIMAP_SHAPE_TIP = "사각 또는 원형 — 사각에서 원형으로 돌리려면 /reload 가 필요합니다",
+    -- 미니맵 크기 로케일 키 추가, dik, 2026-10-03
+    SETTING_MINIMAP_SIZE = "미니맵 크기(%)",
+    SETTING_MINIMAP_SIZE_TIP = "미니맵 가로·세로 크기 비율입니다(100 = 기본). 바꾼 뒤 /reload 하면 적용됩니다",
+    MSG_MINIMAP_SIZE_RELOAD = "미니맵 크기는 /reload 하면 적용됩니다",
     MINIMAP_SHAPE_SQUARE = "사각",
     MINIMAP_SHAPE_ROUND = "원형",
     HUD_LABEL_STATS = "능력치 패널",
