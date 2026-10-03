@@ -727,7 +727,8 @@ ns.L = {
     SETTING_PROGRESS_EXPLORE = "탐험 진척 수집",
     SETTING_PROGRESS_EXPLORE_TIP = "탐험 도전과제의 세부 조건을 읽어 지역별 미탐험 수를 저장하고 탐험 보기를 표시합니다",
     -- 능력치·미니맵 로케일 키 추가, dik, 2026-10-01
-    MODULE_STATSMINIMAP = "능력치·미니맵",
+    -- 능력치 패널로 이름 변경, dik, 2026-10-03
+    MODULE_STATSMINIMAP = "능력치 패널",
     SETTING_STATS_SHOW = "능력치 패널 사용",
     SETTING_STATS_SHOW_TIP = "화면에 주 능력치·방어도 등을 보여 주는 패널을 표시합니다 — /dikf 이동 으로 옮길 수 있습니다",
     SETTING_STATS_SET = "능력치 표시 항목",
@@ -736,8 +737,6 @@ ns.L = {
     STATS_SET_ALL = "전체",
     SETTING_STATS_BG_ALPHA = "패널 배경 불투명도",
     SETTING_STATS_BG_ALPHA_TIP = "능력치 패널 배경의 불투명도",
-    SETTING_MINIMAP_SKIN = "미니맵 스킨 사용",
-    SETTING_MINIMAP_SKIN_TIP = "미니맵 테두리와 지역 이름 글꼴을 DikForever 테마로 바꿉니다",
     SETTING_MINIMAP_SHAPE = "미니맵 모양",
     SETTING_MINIMAP_SHAPE_TIP = "사각 또는 원형 — 사각에서 원형으로 돌리려면 /reload 가 필요합니다",
     MINIMAP_SHAPE_SQUARE = "사각",
@@ -953,7 +952,8 @@ ns.L = {
     MODULE_INFOBAR_DESC = "화면 위쪽에 메뉴 버튼·시계·좌표 정보바를 표시합니다",
     MODULE_QUEST_TRACKER_DESC = "퀘스트 목표 추적기의 글꼴·색·배경을 바꿉니다",
     MODULE_DAMAGEMETER_DESC = "기본 피해량 미터 정보를 옮길 수 있는 창으로 보여 줍니다",
-    MODULE_STATSMINIMAP_DESC = "능력치 패널을 띄우고 미니맵 모양을 바꿉니다",
+    -- 능력치 패널 설명으로 변경, dik, 2026-10-03
+    MODULE_STATSMINIMAP_DESC = "화면에 능력치 패널을 띄웁니다",
     MODULE_COMBATHUD_DESC = "플레이어·대상 체력 프레임과 액션 버튼 모양을 제공합니다",
     MODULE_THREAT_DESC = "대상에 대한 내 위협과 파티원 위협 상태를 표시합니다",
     MODULE_HIDEFRAMES_DESC = "Blizzard 기본 화면 프레임을 골라 숨깁니다",
@@ -1205,4 +1205,8 @@ ns.L = {
     MSG_PQA_PARTIAL = "퀘스트 파티 알림: 일부 이벤트를 쓸 수 없어 알림이 늦거나 빠질 수 있습니다 (%s)",
     -- 동작 차단 외부 경로 안내(WFA-040), dik, 2026-10-02
     MSG_ACTION_BLOCKED_EXTERNAL = "게임이 DikForever 와 관련된 동작(%s)을 막았습니다. 기능은 끄지 않습니다 — 반복되면 /console taintLog 1 로 로그를 남겨 알려 주세요",
+    -- 미니맵 모듈 분리 로케일 키 추가, dik, 2026-10-03
+    MODULE_MINIMAPSKIN = "미니맵",
+    MODULE_MINIMAPSKIN_DESC = "미니맵을 사각 모양·1px 테두리로 바꾸고 지역 이름 글꼴을 맞춥니다",
+    MSG_MINIMAPSKIN_MIGRATED = "미니맵 설정을 '능력치 패널' 에서 '미니맵' 으로 옮겼습니다",
 }

@@ -1,4 +1,5 @@
 -- 능력치 패널·미니맵 스킨 화면, dik, 2026-10-01
+-- 미니맵 스킨 코드 제거, dik, 2026-10-03
 local addonName, ns = ...
 
 local module = ns.GetModule("statsMinimap")
@@ -9,22 +10,16 @@ end
 local L = ns.L
 local Theme = ns.Theme
 
-local BORDER_OUTSET = 1
 local ROW_H_FALLBACK = 14
 local ROW_PAD = 4
 
 local active = false
 local statsPartialShown = false
-local minimapPartialShown = false
-local minimapFirstDone = false
-local maskApplied = false
 local hudActive = false
 local layouting = false
 local hud = nil
 local title = nil
 local rows = nil
-local borderFrame = nil
-local eventFrame = nil
 
 -- 설정 값 조회, dik, 2026-10-01
 local function Get(key)
@@ -177,106 +172,6 @@ local function SyncPanel()
     Layout()
 end
 
--- 자체 테두리 조회(필요 시 생성), dik, 2026-10-01
-local function GetBorder(m)
-    if not borderFrame then
-        borderFrame = CreateFrame("Frame", nil, m, "BackdropTemplate")
-        borderFrame:SetPoint("TOPLEFT", m, "TOPLEFT", -BORDER_OUTSET, BORDER_OUTSET)
-        borderFrame:SetPoint("BOTTOMRIGHT", m, "BOTTOMRIGHT", BORDER_OUTSET, -BORDER_OUTSET)
-        Theme.ApplyBackdrop(borderFrame, "BG", "BORDER", 0)
-    end
-    return borderFrame
-end
-
--- 미니맵 스킨 적용, dik, 2026-10-01
-local function ApplyMinimap()
-    if Get("skinMinimap") ~= true then
-        return
-    end
-    local missing = {}
-    local m = ns.Display.Find("Minimap")
-    if not m then
-        missing[1] = "Minimap"
-    else
-        ns.Display.BeginSkin(ns.StatsMinimap.SKIN_OWNER)
-        for _, group in ipairs(ns.StatsMinimap.MINIMAP_GROUPS) do
-            local applied = 0
-            for _, path in ipairs(group.candidates) do
-                local obj = ns.Display.Find(unpack(path))
-                if obj then
-                    if group.kind == "texture" and type(obj.GetVertexColor) == "function" then
-                        ns.Display.HideTexture(ns.StatsMinimap.SKIN_OWNER, obj)
-                        applied = applied + 1
-                    elseif group.kind == "font" and type(obj.GetFont) == "function" then
-                        -- 서체 적용 성공 시에만 적용 수 증가, dik, 2026-10-01
-                        if ns.Display.SetFontFace(ns.StatsMinimap.SKIN_OWNER, obj, "FACE_BODY") then
-                            applied = applied + 1
-                        end
-                    end
-                end
-            end
-            if applied == 0 then
-                missing[#missing + 1] = table.concat(group.candidates[1], ".")
-            end
-        end
-
-        if Get("minimapShape") == "square" then
-            if type(m.SetMaskTexture) == "function" then
-                m:SetMaskTexture(Theme.TEXTURE_WHITE)
-                maskApplied = true
-                GetBorder(m):Show()
-            else
-                missing[#missing + 1] = "Minimap:SetMaskTexture"
-                if borderFrame then
-                    borderFrame:Hide()
-                end
-            end
-        elseif borderFrame then
-            borderFrame:Hide()
-        end
-    end
-
-    if not minimapFirstDone then
-        minimapFirstDone = true
-        if #missing > 0 and not minimapPartialShown then
-            minimapPartialShown = true
-            ns.Print(L.MSG_MINIMAP_SKIN_PARTIAL:format(ns.FormatMissingAPIs(missing)))
-        end
-    end
-end
-
--- 미니맵 스킨 전투 밖 적용 요청, dik, 2026-10-01
-local function RequestMinimap()
-    ns.Display.RunOutOfCombat("statsMinimap:minimap", ApplyMinimap)
-end
-
--- 미니맵 스킨 끄기, dik, 2026-10-01
-local function DisableMinimap()
-    if ns.Display.IsSkinActive(ns.StatsMinimap.SKIN_OWNER) then
-        ns.Display.RestoreSkin(ns.StatsMinimap.SKIN_OWNER)
-        if borderFrame then
-            borderFrame:Hide()
-        end
-        ns.Print(L.MSG_SKIN_RESTORED)
-        if maskApplied then
-            ns.Print(L.MSG_MINIMAP_SHAPE_RELOAD)
-        end
-    elseif borderFrame then
-        borderFrame:Hide()
-    end
-end
-
--- 이벤트 프레임 생성, dik, 2026-10-01
-local function CreateEventFrame()
-    eventFrame = CreateFrame("Frame")
-    eventFrame:SetScript("OnEvent", function()
-        if active and ns.Display.IsSkinActive(ns.StatsMinimap.SKIN_OWNER) then
-            RequestMinimap()
-        end
-    end)
-    pcall(eventFrame.RegisterEvent, eventFrame, "PLAYER_ENTERING_WORLD")
-end
-
 -- READY 초기화, dik, 2026-10-01
 local function Initialize()
     if not (ns.IsModuleEnabled("statsMinimap") and ns.IsModuleSupported("statsMinimap")) then
@@ -285,10 +180,6 @@ local function Initialize()
     active = true
     if Get("showStats") == true then
         SyncPanel()
-    end
-    CreateEventFrame()
-    if Get("skinMinimap") == true then
-        RequestMinimap()
     end
 end
 
@@ -318,26 +209,6 @@ local function OnSettingChanged(scope, key, value)
     elseif key == "statsAlpha" then
         if hud and type(value) == "number" then
             Theme.ApplyBackdrop(hud, "BG", "BORDER", value)
-        end
-    elseif key == "skinMinimap" then
-        if value == true then
-            RequestMinimap()
-        else
-            DisableMinimap()
-        end
-    elseif key == "minimapShape" then
-        if Get("skinMinimap") ~= true then
-            return
-        end
-        if value == "square" then
-            RequestMinimap()
-        else
-            if borderFrame then
-                borderFrame:Hide()
-            end
-            if maskApplied then
-                ns.Print(L.MSG_MINIMAP_SHAPE_RELOAD)
-            end
         end
     end
 end

@@ -1,4 +1,5 @@
 -- 능력치·미니맵 모듈 등록·판정 함수·능력치 공급자, dik, 2026-10-01
+-- 미니맵 스킨 분리(MinimapSkin 모듈로 이동), dik, 2026-10-03
 local addonName, ns = ...
 local L = ns.L
 
@@ -19,20 +20,11 @@ ns.StatsMinimap.STAT_ROWS = {
     { provider = "statMastery", set = "all" },
 }
 
-ns.StatsMinimap.MINIMAP_GROUPS = {
-    { key = "border", kind = "texture", candidates = { { "MinimapCompassTexture" }, { "MinimapBorder" } } },
-    { key = "borderTop", kind = "texture",
-      candidates = { { "MinimapCluster", "BorderTop" }, { "MinimapBorderTop" } } },
-    { key = "zoneText", kind = "font", candidates = { { "MinimapZoneText" } } },
-}
-
 ns.StatsMinimap.HUD_STATS = { key = "stats", point = "TOPLEFT", relativePoint = "TOPLEFT", x = 16, y = -140, strata = "LOW" }
 
 ns.StatsMinimap.PANEL_MIN_W = 120
 
 ns.StatsMinimap.OWNER = "statsMinimap"
-
-ns.StatsMinimap.SKIN_OWNER = "statsMinimap:minimap"
 
 local SPELL_SCHOOL_FIRST = 2
 local SPELL_SCHOOL_LAST = 7
@@ -238,14 +230,5 @@ ns.RegisterModule({
           default = "all" },
         { key = "statsAlpha", type = "slider", label = L.SETTING_STATS_BG_ALPHA,
           tooltip = L.SETTING_STATS_BG_ALPHA_TIP, min = 0, max = 1, step = 0.05, default = 0.8 },
-        { key = "skinMinimap", type = "checkbox", label = L.SETTING_MINIMAP_SKIN,
-          tooltip = L.SETTING_MINIMAP_SKIN_TIP, default = true },
-        { key = "minimapShape", type = "select", label = L.SETTING_MINIMAP_SHAPE,
-          tooltip = L.SETTING_MINIMAP_SHAPE_TIP,
-          items = {
-              { value = "square", text = L.MINIMAP_SHAPE_SQUARE },
-              { value = "round", text = L.MINIMAP_SHAPE_ROUND },
-          },
-          default = "square" },
     },
 })
