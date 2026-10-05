@@ -49,7 +49,8 @@ SlashCmdList.DIKFOREVER = function(msg)
     elseif cmd == L.SLASH_CMD_CHARACTERS then
         ns.PrintCharacters()
     -- 이동 모드 슬래시 분기 추가, dik, 2026-10-01
-    elseif cmd == L.SLASH_CMD_MOVE then
+    -- 편집 별칭 추가, dik, 2026-10-05
+    elseif cmd == L.SLASH_CMD_EDIT or cmd == L.SLASH_CMD_MOVE then
         ns.Fire("TOGGLE_MOVE_MODE")
     -- 설정 이전 슬래시 분기 추가, dik, 2026-10-02
     elseif cmd == L.SLASH_CMD_TRANSFER then

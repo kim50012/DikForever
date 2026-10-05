@@ -33,6 +33,10 @@ local SEARCH_MAX_LETTERS = 50
 local DISABLED_ALPHA = 0.4
 -- 여러 줄 글상자 기본 높이 상수, dik, 2026-10-02
 local TEXTAREA_DEFAULT_H = 90
+-- 슬라이더 숫자 입력칸 크기 상수, dik, 2026-10-05
+local SLIDER_INPUT_W = 56
+local SLIDER_INPUT_H = 18
+local SLIDER_INPUT_MAX_LETTERS = 10
 
 -- 툴팁 연결, dik, 2026-09-30
 local function AttachTooltip(frame, def)
@@ -311,9 +315,18 @@ function Widgets.CreateSlider(parent, def, getValue, onChange)
     label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
     label:SetText(def.label or "")
 
-    local valueText = Widgets.CreateLabel(frame, "FONT_NUMBER", "ACCENT")
+    -- 값 글자를 숫자 입력칸으로 교체, dik, 2026-10-05
+    local valueText = CreateFrame("EditBox", nil, frame, "BackdropTemplate")
+    Theme.ApplyBackdrop(valueText, "PANEL", "BORDER")
+    valueText:SetSize(SLIDER_INPUT_W, SLIDER_INPUT_H)
     valueText:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+    valueText:SetAutoFocus(false)
+    valueText:SetMultiLine(false)
+    valueText:SetMaxLetters(SLIDER_INPUT_MAX_LETTERS)
+    valueText:SetFontObject(Theme.GetFont("FONT_NUMBER"))
+    valueText:SetTextColor(Theme.GetColor("ACCENT"))
     valueText:SetJustifyH("RIGHT")
+    valueText:SetTextInsets(Theme.PAD / 2, Theme.PAD / 2, 0, 0)
 
     -- 라벨 영역 툴팁 수신, dik, 2026-10-01
     frame:EnableMouse(true)
@@ -362,7 +375,10 @@ function Widgets.CreateSlider(parent, def, getValue, onChange)
     end
 
     slider:SetScript("OnValueChanged", function(_, value, userInput)
-        valueText:SetText(string.format(fmt, value))
+        -- 입력 중이 아닐 때만 글자 갱신, dik, 2026-10-05
+        if not valueText:HasFocus() then
+            valueText:SetText(string.format(fmt, value))
+        end
         if guard then
             return
         end
@@ -383,6 +399,48 @@ function Widgets.CreateSlider(parent, def, getValue, onChange)
 
     AttachTooltip(frame, def)
     AttachTooltip(slider, def)
+
+    -- 입력 글자를 min~max·step 격자로 보정, dik, 2026-10-05
+    local function NormalizeInput(text)
+        text = string.gsub(text or "", "^%s+", "")
+        text = string.gsub(text, "%s+$", "")
+        text = string.gsub(text, ",", ".")
+        local v = tonumber(text)
+        if v == nil or v ~= v then
+            return nil
+        end
+        v = math.min(math.max(v, def.min), def.max)
+        v = def.min + math.floor((v - def.min) / step + 0.5) * step
+        v = tonumber(string.format(fmt, v))
+        return math.min(math.max(v, def.min), def.max)
+    end
+
+    -- 입력칸 글자를 슬라이더 현재값으로 복원, dik, 2026-10-05
+    local function RestoreText()
+        valueText:SetText(string.format(fmt, slider:GetValue()))
+    end
+
+    valueText:SetScript("OnEnterPressed", function(self)
+        local v = NormalizeInput(self:GetText())
+        if v ~= nil and v ~= committed then
+            committed = v
+            if onChange then
+                onChange(v)
+            end
+        end
+        frame:Refresh()
+        self:ClearFocus()
+    end)
+    valueText:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+    end)
+    valueText:SetScript("OnEditFocusGained", function(self)
+        self:SetBackdropBorderColor(Theme.GetColor("ACCENT"))
+    end)
+    valueText:SetScript("OnEditFocusLost", function(self)
+        self:SetBackdropBorderColor(Theme.GetColor("BORDER"))
+        RestoreText()
+    end)
 
     -- 현재값으로 다시 그리기, dik, 2026-09-30
     frame.Refresh = function()

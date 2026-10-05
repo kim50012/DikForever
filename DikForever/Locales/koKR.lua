@@ -21,7 +21,8 @@ ns.L = {
         -- 캐릭터 도움말 줄 추가, dik, 2026-09-30
         "/dikf 캐릭터 — 저장된 캐릭터 목록",
         -- 이동 모드 도움말 줄 추가, dik, 2026-10-01
-        "/dikf 이동 — 화면 요소 이동 모드 켜기/끄기",
+        -- 편집 모드 도움말 문구 변경, dik, 2026-10-05
+        "/dikf 편집 — 화면 요소 편집 모드 켜기/끄기(이동·설정)",
         -- 설정 이전 도움말 줄 추가, dik, 2026-10-02
         "/dikf 이전 — 설정 이전(내보내기·가져오기) 페이지 열기",
         -- 레이아웃 도움말 줄 추가, dik, 2026-10-03
@@ -59,7 +60,8 @@ ns.L = {
     SETTING_SHOW_HELP_TIP = "홈 화면 아래에 슬래시 명령 목록을 보여 줍니다",
     BUTTON_OPEN_MAIN = "관리창 열기",
     -- 관리창 이동 모드 버튼 추가, dik, 2026-10-01
-    BUTTON_MOVE_MODE = "창 이동",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    BUTTON_MOVE_MODE = "편집",
     HOME_VERSION = "버전 %s",
     -- 빌드 해시 포함 버전 표시, dik, 2026-10-03
     HOME_VERSION_BUILD = "버전 %s (%s)",
@@ -292,6 +294,12 @@ ns.L = {
     SETTING_LOCKOUTS_LIMIT_TIP = "시간당 입장 횟수 표시·안내에 쓰는 한도입니다(실제 서버 규칙과 다를 수 있음)",
     -- 채팅창 스킨·정보줄 키 추가, dik, 2026-10-01
     SLASH_CMD_MOVE = "이동",
+    -- 편집 모드 새 키, dik, 2026-10-05
+    SLASH_CMD_EDIT = "편집",
+    FMT_EDIT_PANEL_TITLE = "%s 설정",
+    BUTTON_EDIT_RESET = "위치 초기화",
+    BUTTON_EDIT_CLOSE = "닫기",
+    TIP_EDIT_RESET = "이 창을 기본 위치로 되돌립니다",
     ERR_SETTING_CHOICE = "허용되지 않은 선택값입니다: %s.%s = %s",
     ERR_INFO_PROVIDER = "정보 항목 등록 실패: %s",
     MODULE_CHAT = "채팅창",
@@ -308,7 +316,8 @@ ns.L = {
     SETTING_CHAT_SHOW_INFO = "정보줄 표시",
     SETTING_CHAT_SHOW_INFO_TIP = "채팅창 아래에 FPS·지연·골드 등 정보줄을 표시합니다",
     SETTING_CHAT_INFO_POSITION = "정보줄 위치",
-    SETTING_CHAT_INFO_POSITION_TIP = "'자유 배치' 를 고르면 /dikf 이동 으로 옮길 수 있습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    SETTING_CHAT_INFO_POSITION_TIP = "'자유 배치' 를 고르면 /dikf 편집 으로 옮길 수 있습니다",
     CHAT_POS_BELOW = "채팅창 아래",
     CHAT_POS_FREE = "자유 배치",
     SETTING_CHAT_INFO_FPS = "FPS 표시",
@@ -335,11 +344,16 @@ ns.L = {
     MSG_CHAT_SKIN_PARTIAL = "채팅창 스킨 일부를 적용하지 못했습니다 — 없는 요소: %s",
     MSG_SKIN_RESTORED = "기본 모양으로 되돌렸습니다 — 어긋난 곳이 있으면 /reload 하세요",
     -- 이동 버튼 안내 추가, dik, 2026-10-01
-    MSG_MOVE_ON = "이동 모드 — 노란 상자를 끌어 옮기고, 오른쪽 클릭하면 기본 위치로 돌아갑니다. 끝내려면 '창 이동' 버튼을 다시 누르거나 /dikf 이동",
-    MSG_MOVE_OFF = "이동 모드를 끝냈습니다",
-    MSG_MOVE_COMBAT = "전투 중에는 이동 모드를 쓸 수 없습니다",
-    MSG_MOVE_COMBAT_EXIT = "전투가 시작되어 이동 모드를 끝냈습니다",
-    MSG_MOVE_NONE = "옮길 수 있는 화면 요소가 없습니다 — '자유 배치' 로 둔 요소만 옮길 수 있습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MSG_MOVE_ON = "편집 모드 — 노란 상자를 끌어 옮기고, 오른쪽 클릭하면 그 창 설정이 열립니다. 끝내려면 '편집' 버튼을 다시 누르거나 /dikf 편집",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MSG_MOVE_OFF = "편집 모드를 끝냈습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MSG_MOVE_COMBAT = "전투 중에는 편집 모드를 쓸 수 없습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MSG_MOVE_COMBAT_EXIT = "전투가 시작되어 편집 모드를 끝냈습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MSG_MOVE_NONE = "편집할 수 있는 화면 요소가 없습니다 — '자유 배치' 로 둔 요소만 편집할 수 있습니다",
     -- 상단 정보바 키 추가, dik, 2026-10-01
     MODULE_INFOBAR = "상단 정보바",
     SETTING_INFOBAR_BG_ALPHA = "배경 불투명도",
@@ -380,7 +394,8 @@ ns.L = {
     MENU_GUILD = "길드",
     MENU_DIKFOREVER = "DikF",
     -- 정보바 이동 버튼 추가, dik, 2026-10-01
-    MENU_MOVE = "이동",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    MENU_MOVE = "편집",
     MSG_MENU_COMBAT = "전투 중에는 이 창을 열 수 없습니다",
     MSG_MENU_UNAVAILABLE = "이 창을 열 수 없습니다: %s",
     MSG_MENU_BLOCKED = "게임이 애드온 동작을 막아 이번 접속 동안 정보바 메뉴 버튼을 끕니다",
@@ -730,7 +745,8 @@ ns.L = {
     -- 능력치 패널로 이름 변경, dik, 2026-10-03
     MODULE_STATSMINIMAP = "능력치 패널",
     SETTING_STATS_SHOW = "능력치 패널 사용",
-    SETTING_STATS_SHOW_TIP = "화면에 주 능력치·방어도 등을 보여 주는 패널을 표시합니다 — /dikf 이동 으로 옮길 수 있습니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    SETTING_STATS_SHOW_TIP = "화면에 주 능력치·방어도 등을 보여 주는 패널을 표시합니다 — /dikf 편집 으로 옮길 수 있습니다",
     SETTING_STATS_SET = "능력치 표시 항목",
     SETTING_STATS_SET_TIP = "주 능력치·방어도만 또는 전체(공격력·주문력·치명타·가속·특화 포함)",
     STATS_SET_MAIN = "주 능력치·방어도",
@@ -839,7 +855,8 @@ ns.L = {
     SETTING_COMBATHUD_TARGET_HEIGHT_TIP = "넓은 바 모양 대상 체력 막대의 높이(20 미만이면 작은 글꼴) — 전투 중 변경은 전투가 끝난 뒤 적용됩니다",
     SETTING_COMBATHUD_SCALE = "전투 HUD 배율",
     -- 시전 바·대상의 대상 포함으로 문구 변경, dik, 2026-10-01
-    SETTING_COMBATHUD_SCALE_TIP = "전투 HUD 전체(플레이어·대상·대상 시전 바·대상의 대상) 크기 배율 — 바꾸면 화면상 위치가 조금 움직일 수 있습니다(/dikf 이동 으로 다시 놓으세요)",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    SETTING_COMBATHUD_SCALE_TIP = "전투 HUD 전체(플레이어·대상·대상 시전 바·대상의 대상) 크기 배율 — 바꾸면 화면상 위치가 조금 움직일 수 있습니다(/dikf 편집 으로 다시 놓으세요)",
     -- 현재 / 최대 형식으로 문구 변경, dik, 2026-10-01
     SETTING_COMBATHUD_TARGET_VALUE = "넓은 대상 바 체력 수치 표시(현재 / 최대)",
     -- 현재 / 최대 형식으로 문구 변경, dik, 2026-10-01
@@ -963,7 +980,8 @@ ns.L = {
     MODULE_HIDEFRAMES_DESC = "Blizzard 기본 화면 프레임을 골라 숨깁니다",
     TIP_CLOSE_TITLE = "닫기",
     TIP_CLOSE = "관리창을 닫습니다 — Esc 로도 닫힙니다",
-    TIP_MOVE_MODE = "전투 HUD·미터·정보바 등 화면 창을 끌어 옮기는 모드를 켜고 끕니다",
+    -- 편집 모드 문구 변경, dik, 2026-10-05
+    TIP_MOVE_MODE = "전투 HUD·미터·정보바 등 화면 창을 끌어 옮기고, 오른쪽 클릭으로 그 창 설정을 여는 편집 모드를 켜고 끕니다",
     TIP_RESIZE_TITLE = "크기 조절",
     TIP_RESIZE = "끌어서 관리창 크기를 바꿉니다 — '창 잠금' 이 켜지면 막힙니다",
     SEARCH_TITLE = "기능 검색",

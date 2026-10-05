@@ -59,9 +59,10 @@ end
 
 -- 선언 목록 행 배치, dik, 2026-09-30
 -- 줄 위치 기록 인자 rows 추가, dik, 2026-10-01
-local function AddDefRows(content, scope, y, indent, rows)
+-- 선언 목록 선택 인자 defs 추가, dik, 2026-10-05
+local function AddDefRows(content, scope, y, indent, rows, defs)
     local theme = ns.Theme
-    local defs = ns.GetSettingDefs(scope)
+    defs = defs or ns.GetSettingDefs(scope)
     for i = 1, #defs do
         local row, reason = CreateSettingRow(content, scope, defs[i])
         if row then
@@ -229,6 +230,24 @@ function ns.SettingsUI.RenderModuleSettings(parent, id)
         y = AddDimText(content, L.MSG_NO_SETTINGS, y, 0)
     else
         y = AddDefRows(content, id, y, 0, rows)
+    end
+    content:SetHeight(y + theme.PAD)
+    AttachFocus(frame, scroll, content, rows, {})
+    return frame
+end
+
+-- 영역(HUD)별 설정 렌더러, dik, 2026-10-05
+function ns.SettingsUI.RenderHudSettings(parent, moduleId, hudKey)
+    local theme = ns.Theme
+    local frame = CreateFrame("Frame", nil, parent)
+    local scroll, content = ns.Widgets.CreateScrollArea(frame)
+    local rows = {}
+    local y = theme.PAD
+    local defs = ns.GetHudSettingDefs(moduleId, hudKey)
+    if #defs == 0 then
+        y = AddDimText(content, L.MSG_NO_SETTINGS, y, 0)
+    else
+        y = AddDefRows(content, moduleId, y, 0, rows, defs)
     end
     content:SetHeight(y + theme.PAD)
     AttachFocus(frame, scroll, content, rows, {})

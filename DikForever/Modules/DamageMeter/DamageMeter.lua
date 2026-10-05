@@ -310,23 +310,24 @@ local function BuildWindowSettings()
         DM.PickDefaultType(DM.TYPE_ITEMS, "DamageTaken"),
     }
     local list = {}
+    -- 설정 창별 huds 태그 추가, dik, 2026-10-05
     for i = 1, DM.WINDOW_MAX do
         local function Name(text)
             return L.FMT_DAMAGEMETER_WINDOW_SETTING:format(i, text)
         end
-        list[#list + 1] = { key = DM.WindowKey("meterType", i), type = "select",
+        list[#list + 1] = { key = DM.WindowKey("meterType", i), huds = { DM.HUD_WINDOWS[i].key }, type = "select",
           label = Name(L.SETTING_DAMAGEMETER_TYPE), tooltip = L.SETTING_DAMAGEMETER_TYPE_TIP,
           items = DM.TYPE_ITEMS, default = defaultTypes[i] }
-        list[#list + 1] = { key = DM.WindowKey("segment", i), type = "select",
+        list[#list + 1] = { key = DM.WindowKey("segment", i), huds = { DM.HUD_WINDOWS[i].key }, type = "select",
           label = Name(L.SETTING_DAMAGEMETER_SEGMENT), tooltip = L.SETTING_DAMAGEMETER_SEGMENT_TIP,
           items = DM.SEGMENT_ITEMS, default = "current" }
-        list[#list + 1] = { key = DM.WindowKey("width", i), type = "slider",
+        list[#list + 1] = { key = DM.WindowKey("width", i), huds = { DM.HUD_WINDOWS[i].key }, type = "slider",
           label = Name(L.SETTING_DAMAGEMETER_WIDTH), tooltip = L.SETTING_DAMAGEMETER_WIDTH_TIP,
           min = 160, max = 400, step = 10, default = 240 }
-        list[#list + 1] = { key = DM.WindowKey("maxBars", i), type = "slider",
+        list[#list + 1] = { key = DM.WindowKey("maxBars", i), huds = { DM.HUD_WINDOWS[i].key }, type = "slider",
           label = Name(L.SETTING_DAMAGEMETER_MAX_BARS), tooltip = L.SETTING_DAMAGEMETER_MAX_BARS_TIP,
           min = 3, max = 20, step = 1, default = 8 }
-        list[#list + 1] = { key = DM.WindowKey("locked", i), type = "checkbox",
+        list[#list + 1] = { key = DM.WindowKey("locked", i), huds = { DM.HUD_WINDOWS[i].key }, type = "checkbox",
           label = Name(L.SETTING_DAMAGEMETER_LOCKED), tooltip = L.SETTING_DAMAGEMETER_LOCKED_TIP,
           default = false }
     end

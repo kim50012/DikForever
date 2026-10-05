@@ -406,8 +406,9 @@ local function CreateOverlay(info)
         end
     end)
     overlay:SetScript("OnMouseUp", function(_, button)
-        if button == "RightButton" then
-            frame:ResetPosition()
+        -- 오른쪽 클릭을 설정 창 열기 이벤트로 변경, dik, 2026-10-05
+        if button == "RightButton" and dragging == nil then
+            ns.Fire("HUD_EDIT_OPEN", info.moduleId, info.key)
         end
     end)
     overlay:Hide()
@@ -474,6 +475,14 @@ function Display.CreateHudFrame(moduleId, key, opts)
             Display.RunOutOfCombat("hud:" .. moduleId .. ":" .. key, function()
                 ApplySaved(info)
             end)
+            -- 이동 모드 중 재활성 시 덮개 표시, dik, 2026-10-05
+            if moveOn then
+                if not info.overlay then
+                    info.overlay = CreateOverlay(info)
+                end
+                info.overlay:SetFrameLevel(frame:GetFrameLevel() + 1)
+                info.overlay:Show()
+            end
         else
             -- 직접 끌기 중단을 덮개 유무와 무관하게 수행, dik, 2026-10-01
             if dragging == info then
@@ -534,6 +543,16 @@ function Display.CreateHudFrame(moduleId, key, opts)
         ClearHudPosition(info)
     end
     return frame
+end
+
+-- HUD 프레임·표시 이름 조회, dik, 2026-10-05
+function Display.GetHud(moduleId, key)
+    local byModule = huds[moduleId]
+    local info = byModule and byModule[key]
+    if not info then
+        return nil
+    end
+    return info.frame, (info.opts.label or key)
 end
 
 -- 이동 모드 전환, dik, 2026-10-01

@@ -161,6 +161,32 @@ function ns.GetSettingDefs(scope)
     return defs
 end
 
+-- 창별 설정 선언 거르기, dik, 2026-10-05
+function ns.GetHudSettingDefs(moduleId, hudKey)
+    local result = {}
+    if moduleId == "global" or not modules[moduleId] then
+        return result
+    end
+    local defs = ns.GetSettingDefs(moduleId)
+    for i = 1, #defs do
+        local def = defs[i]
+        local huds = def.huds
+        local keep = def.key == "enabled" or type(huds) ~= "table"
+        if not keep then
+            for k = 1, #huds do
+                if huds[k] == hudKey then
+                    keep = true
+                    break
+                end
+            end
+        end
+        if keep then
+            result[#result + 1] = def
+        end
+    end
+    return result
+end
+
 -- 선언 찾기, dik, 2026-09-30
 local function FindSettingDef(scope, key)
     local defs = ns.GetSettingDefs(scope)

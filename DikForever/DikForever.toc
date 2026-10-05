@@ -2,8 +2,8 @@
 ## Title: DikForever
 ## Notes: 개인용 통합 관리 도구
 ## Author: dik
-## Version: 0.1.38
-## X-Build: de0f693
+## Version: 0.1.39
+## X-Build: 04e28ed
 ## SavedVariables: DikForeverDB
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## AddonCompartmentFunc: DikForever_OnAddonCompartmentClick
@@ -27,6 +27,7 @@ UI\MainFrame.lua
 UI\HomePage.lua
 UI\SettingsPage.lua
 UI\Display.lua
+UI\EditPanel.lua
 UI\Tooltip.lua
 Modules\Alts\Alts.lua
 Modules\Alts\AltsPage.lua
