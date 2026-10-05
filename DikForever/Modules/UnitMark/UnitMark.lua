@@ -161,24 +161,76 @@ function UM.ReadRank(unit)
     return UM.RankFromClassification(cls, isBoss)
 end
 
+-- 선점 몹 판정 어댑터, dik, 2026-10-05
+function UM.ReadTapDenied(unit)
+    if not IsUnitToken(unit) then
+        return nil
+    end
+    if IsPlayerUnit(unit) then
+        return false
+    end
+    if not ns.HasAPI("UnitIsTapDenied") then
+        return nil
+    end
+    local ok, r = pcall(UnitIsTapDenied, unit)
+    if not ok then
+        ReportOnce(r)
+        return nil
+    end
+    if ns.IsSecret(r) then
+        return nil
+    end
+    return r == true
+end
+
 -- 적용처별 조회(항상 plain), dik, 2026-10-05
 function UM.Get(unit, where)
     local key = WHERE_KEYS[where]
     if not key or not ns.IsModuleEnabled(MODULE_ID) or not ns.IsModuleSupported(MODULE_ID) then
-        return false, nil
+        return false, nil, false, false
     end
     if ns.GetSetting(MODULE_ID, key) == false then
-        return false, nil
+        return false, nil, false, false
     end
-    local quest = false
-    if ns.GetSetting(MODULE_ID, "questName") ~= false and UM.ReadQuest(unit) == true then
-        quest = true
+    -- 퀘스트 판정 1회 공유·bar·tapped 반환 추가, dik, 2026-10-05
+    local wantName = ns.GetSetting(MODULE_ID, "questName") ~= false
+    local wantBar = where ~= "tooltip" and ns.GetSetting(MODULE_ID, "questBar") ~= false
+    local tapped = UM.ReadTapDenied(unit) == true
+    local quest, bar = false, false
+    if not tapped and (wantName or wantBar) and UM.ReadQuest(unit) == true then
+        quest = wantName
+        bar = wantBar
     end
     local rank = nil
     if where ~= "tooltip" and ns.GetSetting(MODULE_ID, "rankMark") ~= false then
         rank = UM.ReadRank(unit)
     end
-    return quest, rank
+    return quest, rank, bar, tapped
+end
+
+-- 플레이어 이름표 직업색 바 색, dik, 2026-10-05
+function UM.GetClassBar(unit)
+    if not IsUnitToken(unit) then
+        return nil
+    end
+    if not ns.IsModuleEnabled(MODULE_ID) or not ns.IsModuleSupported(MODULE_ID) then
+        return nil
+    end
+    if ns.GetSetting(MODULE_ID, "onNameplate") == false or ns.GetSetting(MODULE_ID, "classBar") == false then
+        return nil
+    end
+    if not IsPlayerUnit(unit) then
+        return nil
+    end
+    if not ns.HasAPI("UnitClass") then
+        return nil
+    end
+    local ok, r, classFile = pcall(UnitClass, unit)
+    if not ok then
+        ReportOnce(r)
+        return nil
+    end
+    return ns.ClassBarColor(classFile)
 end
 
 -- 부분별 사용 불가 사유, dik, 2026-10-05
@@ -253,10 +305,16 @@ ns.RegisterModule({
     settings = {
         { key = "questName", type = "checkbox", label = L.SETTING_UNITMARK_QUEST, tooltip = L.SETTING_UNITMARK_QUEST_TIP, default = true,
           unavailable = function() return ns.UnitMark.GetUnavailableReason("quest") end },
+        -- 퀘스트 대상 생명력 바 설정 추가, dik, 2026-10-05
+        { key = "questBar", type = "checkbox", label = L.SETTING_UNITMARK_BAR, tooltip = L.SETTING_UNITMARK_BAR_TIP, default = true,
+          unavailable = function() return ns.UnitMark.GetUnavailableReason("quest") end },
         { key = "rankMark", type = "checkbox", label = L.SETTING_UNITMARK_RANK, tooltip = L.SETTING_UNITMARK_RANK_TIP, default = true,
           unavailable = function() return ns.UnitMark.GetUnavailableReason("rank") end },
         { key = "onHud", type = "checkbox", label = L.SETTING_UNITMARK_HUD, tooltip = L.SETTING_UNITMARK_HUD_TIP, default = true },
         { key = "onNameplate", type = "checkbox", label = L.SETTING_UNITMARK_NAMEPLATE, tooltip = L.SETTING_UNITMARK_NAMEPLATE_TIP, default = true,
+          unavailable = function() return ns.UnitMark.GetUnavailableReason("nameplate") end },
+        -- 플레이어 이름표 직업색 설정 추가, dik, 2026-10-05
+        { key = "classBar", type = "checkbox", label = L.SETTING_UNITMARK_CLASSBAR, tooltip = L.SETTING_UNITMARK_CLASSBAR_TIP, default = true,
           unavailable = function() return ns.UnitMark.GetUnavailableReason("nameplate") end },
         { key = "onTooltip", type = "checkbox", label = L.SETTING_UNITMARK_TOOLTIP, tooltip = L.SETTING_UNITMARK_TOOLTIP_TIP, default = true },
     },

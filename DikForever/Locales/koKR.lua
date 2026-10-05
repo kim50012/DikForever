@@ -950,6 +950,9 @@ ns.L = {
     SETTING_HIDEFRAMES_MINIMAP_TIP = "미니맵과 주변 버튼(애드온 모음 버튼 포함)을 숨깁니다 — DikForever 는 /dikf 로 열 수 있습니다. 끄면 /reload 후 돌아옵니다",
     SETTING_HIDEFRAMES_BUFFS = "기본 버프·약화 효과 숨기기",
     SETTING_HIDEFRAMES_BUFFS_TIP = "화면 오른쪽 위 버프·약화 효과 아이콘을 숨깁니다(오른쪽 클릭으로 버프 취소 불가). 끄면 /reload 후 돌아옵니다",
+    SETTING_HIDEFRAMES_ISSUEREPORTER = "Issue Reporter(버그 제보) 버튼 숨기기",
+    SETTING_HIDEFRAMES_ISSUEREPORTER_TIP = "베타 클라이언트 화면의 Issue Reporter 버튼(벌레 아이콘)과 안내 상자를 숨깁니다. 끄면 /reload 후 돌아옵니다",
+    SETTING_HIDEFRAMES_NO_SOURCE = "이 클라이언트에서는 프레임 출처를 읽을 수 없어 사용할 수 없습니다",
     SETTING_HIDEFRAMES_UNAVAILABLE = "이 클라이언트에 없는 프레임입니다: %s",
     MSG_HIDEFRAMES_PENDING = "전투 중이라 기본 UI 숨기기는 전투가 끝나면 적용됩니다",
     MSG_HIDEFRAMES_PARTIAL = "기본 UI 숨기기: 이 클라이언트에 없는 프레임은 건너뜁니다 — %s",
@@ -1233,15 +1236,22 @@ ns.L = {
     MSG_MINIMAPSKIN_MIGRATED = "미니맵 설정을 '능력치 패널' 에서 '미니맵' 으로 옮겼습니다",
     -- 대상 강조 로케일, dik, 2026-10-05
     MODULE_UNITMARK = "대상 강조",
-    MODULE_UNITMARK_DESC = "퀘스트 대상 이름을 보라색으로, 정예·희귀·우두머리를 꼬리표와 테두리로 표시합니다.",
+    -- 플레이어 이름표 직업색 설명 추가, dik, 2026-10-05
+    MODULE_UNITMARK_DESC = "퀘스트 대상 이름을 보라색으로, 정예·희귀·우두머리를 꼬리표와 테두리로, 플레이어 이름표 생명력 바를 직업색으로 표시합니다.",
     SETTING_UNITMARK_QUEST = "퀘스트 대상 이름 보라색",
     SETTING_UNITMARK_QUEST_TIP = "진행 중인 퀘스트와 관련된 대상의 이름을 보라색·외곽선으로 표시합니다.",
+    -- 퀘스트 대상 생명력 바 설정 문구 추가, dik, 2026-10-05
+    SETTING_UNITMARK_BAR = "퀘스트 대상 생명력 바 보라색",
+    SETTING_UNITMARK_BAR_TIP = "진행 중인 퀘스트와 관련된 대상의 생명력 바를 보라색으로 표시합니다(전투 HUD·이름표).",
     SETTING_UNITMARK_RANK = "정예·희귀·우두머리 표시",
     SETTING_UNITMARK_RANK_TIP = "이름 위에 [정예] 같은 꼬리표를 달고 테두리를 등급 색으로 바꿉니다.",
     SETTING_UNITMARK_HUD = "전투 HUD에 표시",
     SETTING_UNITMARK_HUD_TIP = "대상 넓은 바·기존형 대상·대상의 대상에 표시합니다.",
     SETTING_UNITMARK_NAMEPLATE = "이름표에 표시",
     SETTING_UNITMARK_NAMEPLATE_TIP = "머리 위 이름표의 이름 색과 꼬리표·체력 바 테두리를 바꿉니다.",
+    -- 플레이어 이름표 직업색 설정 문구 추가, dik, 2026-10-05
+    SETTING_UNITMARK_CLASSBAR = "플레이어 이름표 직업색",
+    SETTING_UNITMARK_CLASSBAR_TIP = "머리 위 이름표에서 플레이어(양 진영)의 생명력 바를 직업색으로 표시합니다. '이름표에 표시'가 켜져 있어야 합니다.",
     SETTING_UNITMARK_TOOLTIP = "툴팁에 표시",
     SETTING_UNITMARK_TOOLTIP_TIP = "마우스 툴팁 첫 줄(이름)을 퀘스트 대상이면 보라색으로 표시합니다.",
     UNITMARK_TAG_ELITE = "[정예]",

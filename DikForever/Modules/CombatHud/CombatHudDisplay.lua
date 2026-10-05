@@ -608,11 +608,17 @@ local function FillAura(uf)
 end
 
 -- 대상 강조(꼬리표·테두리) 적용 후 퀘스트 여부 반환, dik, 2026-10-05
+-- 바 보라·선점 회색 변경 여부 반환 추가, dik, 2026-10-05
 local function ApplyMark(uf)
-    local quest, rank = false, nil
+    local quest, rank, bar, tapped = false, nil, false, false
     if ns.UnitMark then
-        quest, rank = ns.UnitMark.Get(uf.unit, "hud")
+        quest, rank, bar, tapped = ns.UnitMark.Get(uf.unit, "hud")
     end
+    -- 바 보라색·선점 회색 여부 기록, dik, 2026-10-05
+    local tappedOn = (tapped == true) and (ns.GetSetting("unitMark", "questBar") ~= false)
+    local barChanged = (uf.markBar == true) ~= (bar == true) or (uf.markTapped == true) ~= tappedOn
+    uf.markBar = (bar == true)
+    uf.markTapped = tappedOn
     local tag, tagColor, borderColor
     if rank and ns.UnitMark then
         tag, tagColor, borderColor = ns.UnitMark.RankStyle(rank)
@@ -636,7 +642,7 @@ local function ApplyMark(uf)
         Theme.ApplyBackdrop(uf.body, "BG", borderColor, GetNumber("bgAlpha", DEFAULT_BG_ALPHA))
         uf.borderToken = borderColor
     end
-    return quest == true
+    return quest == true, barChanged
 end
 
 -- 머리줄(레벨·이름) 채우기, dik, 2026-10-01
@@ -650,11 +656,16 @@ local function FillInfo(uf)
     end
     -- 퀘스트 대상이면 보라색·외곽선 이름, dik, 2026-10-05
     local nameToken, nameColor = "FONT_SMALL", "TEXT"
-    if uf.unit == "target" and ApplyMark(uf) then
+    local quest, barChanged
+    if uf.unit == "target" then
+        quest, barChanged = ApplyMark(uf)
+    end
+    if quest then
         nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
     end
     ApplyNameFont(uf.name, nameToken, name, nameColor)
     uf.name:SetText(name)
+    return barChanged
 end
 
 -- 체력 % 글자 채우기, dik, 2026-10-01
@@ -691,6 +702,16 @@ end
 
 -- 체력 바 색 적용, dik, 2026-10-01
 local function ApplyHealthColor(uf)
+    -- 퀘스트 대상 바 보라색 최우선, dik, 2026-10-05
+    if uf.markBar == true then
+        uf.health:SetColorToken("QUEST_BAR")
+        return
+    end
+    -- 선점 몹 바 회색, dik, 2026-10-05
+    if uf.markTapped == true then
+        uf.health:SetColorToken("HEALTH_TAPPED")
+        return
+    end
     -- 붉은색 고정 키 교체(targetRedFixed), dik, 2026-10-01
     if uf.key == "target" and IsOn("targetRedFixed") then
         uf.health:SetColorToken("HEALTH_RED")
@@ -811,8 +832,13 @@ local function FillTargetBar(uf, doInfo, doHealth)
         local value = C.TargetNameText(UnitName(uf.unit))
         -- 퀘스트 대상이면 보라색 이름, dik, 2026-10-05
         local nameToken, nameColor = uf.nameToken or "FONT_SMALL", "TEXT"
-        if ApplyMark(uf) then
+        local quest, barChanged = ApplyMark(uf)
+        if quest then
             nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
+        end
+        -- info 뒤 바 색 변경 시 같은 주기 재적용, dik, 2026-10-05
+        if barChanged then
+            ApplyHealthColor(uf)
         end
         ApplyNameFont(uf.nameText, nameToken, value, nameColor)
         uf.nameText:SetText(value)
@@ -841,8 +867,13 @@ local function FillToT(uf, doInfo, doHealth)
         end
         -- 퀘스트 대상이면 보라색 이름, dik, 2026-10-05
         local nameToken, nameColor = uf.nameToken or "FONT_SMALL", "TEXT"
-        if ApplyMark(uf) then
+        local quest, barChanged = ApplyMark(uf)
+        if quest then
             nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
+        end
+        -- info 뒤 바 색 변경 시 같은 주기 재적용, dik, 2026-10-05
+        if barChanged then
+            ApplyHealthColor(uf)
         end
         ApplyNameFont(uf.nameText, nameToken, name, nameColor)
         uf.nameText:SetText(name)
@@ -863,8 +894,8 @@ local function FillUnit(uf, doInfo, doHealth, doPower, doAura)
     if uf.wide then
         FillTargetBar(uf, doInfo, doHealth)
     else
-        if doInfo then
-            FillInfo(uf)
+        if doInfo and FillInfo(uf) then
+            ApplyHealthColor(uf)
         end
         if doHealth then
             FillHealth(uf)

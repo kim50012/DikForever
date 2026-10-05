@@ -23,6 +23,11 @@ local stoppedSet = {}
 local partialList = {}
 local partialShown = false
 local stoppedShown = false
+-- 출처 묶음 재시도 상태, dik, 2026-10-05
+local sourceRetryScheduled = false
+local sourceRetryDone = false
+local sourceHiddenKeys = {}
+local Reapply
 
 -- 보호 조작 가능 여부(전투 밖), dik, 2026-10-01
 function ns.HideFramesSecure.CanTouch()
@@ -50,6 +55,28 @@ function ns.HideFramesSecure.HideFrame(frame, mode)
     end
     frame:SetParent(holder)
     return true
+end
+
+-- UIParent 직속 자식 중 출처 일치 프레임 찾기, dik, 2026-10-05
+function ns.HideFramesSecure.FindBySource(pattern)
+    local result = {}
+    if type(UIParent) ~= "table" or type(UIParent.GetChildren) ~= "function" then
+        return result
+    end
+    for _, f in ipairs({ UIParent:GetChildren() }) do
+        local skip = false
+        if type(f.IsForbidden) == "function" then
+            local forbidden = f:IsForbidden()
+            skip = ns.IsSecret(forbidden) or forbidden == true
+        end
+        if not skip and type(f.GetSourceLocation) == "function" then
+            local ok, loc = pcall(f.GetSourceLocation, f)
+            if ok and ns.HideFrames.MatchSource(loc, pattern) then
+                result[#result + 1] = f
+            end
+        end
+    end
+    return result
 end
 
 -- 부모가 보관 프레임인지 판정, dik, 2026-10-01
@@ -104,21 +131,56 @@ local function MergeMissing(missing)
     end
 end
 
+-- 출처 묶음 0개 처리, 3초 뒤 1회 재시도 후 부분 안내, dik, 2026-10-05
+local function HandleSourceEmpty(group)
+    if sourceRetryDone then
+        MergeMissing({ group.source })
+        return
+    end
+    if sourceRetryScheduled then
+        return
+    end
+    if type(C_Timer) == "table" and type(C_Timer.After) == "function" then
+        sourceRetryScheduled = true
+        C_Timer.After(3, function()
+            sourceRetryDone = true
+            ns.Display.RunOutOfCombat("hideFrames:reapply", Reapply)
+        end)
+    else
+        MergeMissing({ group.source })
+    end
+end
+
 -- 켜진 묶음의 못 숨긴 프레임 숨기기, dik, 2026-10-01
 local function HideGroups()
     for _, group in ipairs(ns.HideFrames.GROUPS) do
         if ns.GetSetting(MODULE_ID, group.key) == true then
-            local found, missing = ns.HideFrames.ResolveGroup(group)
-            for _, name in ipairs(found) do
-                local f = ns.Display.Find(name)
-                -- 묶음 숨김 방식 전달, dik, 2026-10-03
-                if type(f) == "table" and not hiddenSet[f] and ns.HideFramesSecure.HideFrame(f, group.mode) == true then
-                    hiddenSet[f] = true
-                    hiddenMode[f] = group.mode
-                    hiddenList[#hiddenList + 1] = f
+            -- 출처 묶음은 FindBySource 결과 사용, dik, 2026-10-05
+            if group.source then
+                for _, f in ipairs(ns.HideFramesSecure.FindBySource(group.source)) do
+                    if not hiddenSet[f] and ns.HideFramesSecure.HideFrame(f, group.mode) == true then
+                        hiddenSet[f] = true
+                        hiddenMode[f] = group.mode
+                        hiddenList[#hiddenList + 1] = f
+                        sourceHiddenKeys[group.key] = true
+                    end
                 end
+                if not sourceHiddenKeys[group.key] then
+                    HandleSourceEmpty(group)
+                end
+            else
+                local found, missing = ns.HideFrames.ResolveGroup(group)
+                for _, name in ipairs(found) do
+                    local f = ns.Display.Find(name)
+                    -- 묶음 숨김 방식 전달, dik, 2026-10-03
+                    if type(f) == "table" and not hiddenSet[f] and ns.HideFramesSecure.HideFrame(f, group.mode) == true then
+                        hiddenSet[f] = true
+                        hiddenMode[f] = group.mode
+                        hiddenList[#hiddenList + 1] = f
+                    end
+                end
+                MergeMissing(missing)
             end
-            MergeMissing(missing)
         end
     end
 end
@@ -147,7 +209,8 @@ local function Apply()
 end
 
 -- 되돌려진 프레임 다시 숨기기, dik, 2026-10-01
-local function Reapply()
+-- 재시도 콜백 참조용 전방 선언으로 변경, dik, 2026-10-05
+function Reapply()
     if not IsActive() then
         return
     end

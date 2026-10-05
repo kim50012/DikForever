@@ -18,7 +18,20 @@ ns.HideFrames.GROUPS = {
         "MultiBarBottomRight", "MultiBarRight", "MultiBarLeft", "MultiBar5", "MultiBar6", "MultiBar7" } },
     { key = "minimap", names = { "MinimapCluster" } },
     { key = "buffs", names = { "BuffFrame", "DebuffFrame" } },
+    -- Issue Reporter 출처 묶음 추가, dik, 2026-10-05
+    { key = "issueReporter", names = {}, source = "Blizzard_PTRFeedback" },
 }
+
+-- 생성 출처 문자열 plain 일치 판별, dik, 2026-10-05
+function ns.HideFrames.MatchSource(location, pattern)
+    if ns.IsSecret(location) or type(location) ~= "string" then
+        return false
+    end
+    if type(pattern) ~= "string" or pattern == "" then
+        return false
+    end
+    return string.find(location, pattern, 1, true) ~= nil
+end
 
 -- 묶음의 있는 이름·없는 이름 분류, dik, 2026-10-01
 function ns.HideFrames.ResolveGroup(group, exists)
@@ -67,6 +80,13 @@ function ns.HideFrames.GetUnavailableReason(key, exists)
     local group = ns.HideFrames.GetGroup(key)
     if not group then
         return nil
+    end
+    -- 출처 묶음은 이름 검사 대신 출처 메서드 검사, dik, 2026-10-05
+    if group.source then
+        if type(UIParent) == "table" and type(UIParent.GetSourceLocation) == "function" then
+            return nil
+        end
+        return L.SETTING_HIDEFRAMES_NO_SOURCE
     end
     local found, missing = ns.HideFrames.ResolveGroup(group, exists)
     if #found == 0 then
@@ -137,6 +157,10 @@ ns.RegisterModule({
         { key = "buffs", type = "checkbox", label = L.SETTING_HIDEFRAMES_BUFFS,
           tooltip = L.SETTING_HIDEFRAMES_BUFFS_TIP, default = false,
           unavailable = function() return ns.HideFrames.GetUnavailableReason("buffs") end },
+        -- Issue Reporter 숨기기 설정 추가, dik, 2026-10-05
+        { key = "issueReporter", type = "checkbox", label = L.SETTING_HIDEFRAMES_ISSUEREPORTER,
+          tooltip = L.SETTING_HIDEFRAMES_ISSUEREPORTER_TIP, default = false,
+          unavailable = function() return ns.HideFrames.GetUnavailableReason("issueReporter") end },
     },
     OnInitialize = function()
         if ns.IsDatabaseNewer() then
