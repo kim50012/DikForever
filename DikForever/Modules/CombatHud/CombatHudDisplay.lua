@@ -258,7 +258,12 @@ local function AnchorHeader(uf)
     local pad = Theme.PAD / 3
     local half = Theme.GAP / 2
     uf.name:ClearAllPoints()
-    uf.name:SetPoint("LEFT", uf.level, "RIGHT", half, 0)
+    -- 꼬리표 표시 중이면 이름 왼쪽 앵커를 꼬리표로, dik, 2026-10-05
+    if uf.rankOn and uf.rankText then
+        uf.name:SetPoint("LEFT", uf.rankText, "RIGHT", half, 0)
+    else
+        uf.name:SetPoint("LEFT", uf.level, "RIGHT", half, 0)
+    end
     if uf.durability and uf.durability.infoActive then
         uf.name:SetPoint("RIGHT", uf.durability, "LEFT", -half, 0)
     else
@@ -602,6 +607,38 @@ local function FillAura(uf)
     LayoutAuraIcons(uf)
 end
 
+-- 대상 강조(꼬리표·테두리) 적용 후 퀘스트 여부 반환, dik, 2026-10-05
+local function ApplyMark(uf)
+    local quest, rank = false, nil
+    if ns.UnitMark then
+        quest, rank = ns.UnitMark.Get(uf.unit, "hud")
+    end
+    local tag, tagColor, borderColor
+    if rank and ns.UnitMark then
+        tag, tagColor, borderColor = ns.UnitMark.RankStyle(rank)
+    end
+    if uf.rankText then
+        local on = tag ~= nil
+        if on then
+            uf.rankText:SetText(tag)
+            uf.rankText:SetTextColor(Theme.GetColor(tagColor))
+            uf.rankText:Show()
+        else
+            uf.rankText:Hide()
+        end
+        if not uf.wide and uf.rankOn ~= on then
+            uf.rankOn = on
+            AnchorHeader(uf)
+        end
+    end
+    borderColor = borderColor or "BORDER"
+    if uf.borderToken ~= borderColor then
+        Theme.ApplyBackdrop(uf.body, "BG", borderColor, GetNumber("bgAlpha", DEFAULT_BG_ALPHA))
+        uf.borderToken = borderColor
+    end
+    return quest == true
+end
+
 -- 머리줄(레벨·이름) 채우기, dik, 2026-10-01
 local function FillInfo(uf)
     local C = ns.CombatHud
@@ -611,7 +648,12 @@ local function FillInfo(uf)
     if not ns.IsSecret(name) and name == nil then
         name = L.VALUE_UNKNOWN
     end
-    ApplyNameFont(uf.name, "FONT_SMALL", name, "TEXT")
+    -- 퀘스트 대상이면 보라색·외곽선 이름, dik, 2026-10-05
+    local nameToken, nameColor = "FONT_SMALL", "TEXT"
+    if uf.unit == "target" and ApplyMark(uf) then
+        nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
+    end
+    ApplyNameFont(uf.name, nameToken, name, nameColor)
     uf.name:SetText(name)
 end
 
@@ -733,6 +775,10 @@ local function UpdateVisibility(uf)
     local exists = UnitExists(uf.unit)
     if not ns.IsSecret(exists) and exists ~= true then
         uf.body:Hide()
+        -- 넓은 바 꼬리표는 hud 자식이라 명시 숨김, dik, 2026-10-05
+        if uf.rankText then
+            uf.rankText:Hide()
+        end
         return false
     end
     uf.body:Show()
@@ -763,7 +809,12 @@ local function FillTargetBar(uf, doInfo, doHealth)
     end
     if doInfo then
         local value = C.TargetNameText(UnitName(uf.unit))
-        ApplyNameFont(uf.nameText, uf.nameToken or "FONT_SMALL", value, "TEXT")
+        -- 퀘스트 대상이면 보라색 이름, dik, 2026-10-05
+        local nameToken, nameColor = uf.nameToken or "FONT_SMALL", "TEXT"
+        if ApplyMark(uf) then
+            nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
+        end
+        ApplyNameFont(uf.nameText, nameToken, value, nameColor)
         uf.nameText:SetText(value)
     end
 end
@@ -788,7 +839,12 @@ local function FillToT(uf, doInfo, doHealth)
         if not ns.IsSecret(name) and name == nil then
             name = L.VALUE_UNKNOWN
         end
-        ApplyNameFont(uf.nameText, uf.nameToken or "FONT_SMALL", name, "TEXT")
+        -- 퀘스트 대상이면 보라색 이름, dik, 2026-10-05
+        local nameToken, nameColor = uf.nameToken or "FONT_SMALL", "TEXT"
+        if ApplyMark(uf) then
+            nameToken, nameColor = Theme.OutlineToken(nameToken), "QUEST_TARGET"
+        end
+        ApplyNameFont(uf.nameText, nameToken, name, nameColor)
         uf.nameText:SetText(name)
     end
 end
@@ -841,6 +897,14 @@ local function BuildUnit(u)
     uf.level:SetWordWrap(false)
     uf.name = Widgets.CreateLabel(uf.body, "FONT_SMALL", "TEXT")
     uf.name:SetWordWrap(false)
+    -- 대상 강조 테두리 기준값·꼬리표(대상만), dik, 2026-10-05
+    uf.borderToken = "BORDER"
+    if u.key == "target" then
+        uf.rankText = Widgets.CreateLabel(uf.body, "FONT_SMALL_OUTLINE", "TEXT")
+        uf.rankText:SetPoint("LEFT", uf.level, "RIGHT", half, 0)
+        uf.rankText:SetWordWrap(false)
+        uf.rankText:Hide()
+    end
 
     -- 바 위 글자 외곽선·밝은 바 보정, dik, 2026-10-02
     uf.health = Widgets.CreateBar(uf.body, { height = GetNumber("healthHeight", DEFAULT_HEALTH_H), readable = true })
@@ -913,6 +977,12 @@ local function BuildTargetBar(u)
     uf.nameText = Widgets.CreateLabel(uf.overlay, "FONT_SMALL_OUTLINE", "TEXT")
     uf.nameText:SetJustifyH("CENTER")
     uf.nameText:SetWordWrap(false)
+    -- 대상 강조 테두리 기준값·꼬리표, dik, 2026-10-05
+    uf.borderToken = "BORDER"
+    uf.rankText = Widgets.CreateLabel(uf.hud, "FONT_SMALL_OUTLINE", "TEXT")
+    uf.rankText:SetPoint("BOTTOMLEFT", uf.hud, "TOPLEFT", 0, 2)
+    uf.rankText:SetWordWrap(false)
+    uf.rankText:Hide()
 
     uf.auraRow = CreateFrame("Frame", nil, uf.body)
     uf.auraRow:SetPoint("TOPLEFT", uf.body, "BOTTOMLEFT", 0, -AURA_ROW_GAP)
@@ -957,6 +1027,8 @@ local function BuildToT()
     uf.nameText = Widgets.CreateLabel(uf.overlay, "FONT_SMALL_OUTLINE", "TEXT")
     uf.nameText:SetJustifyH("LEFT")
     uf.nameText:SetWordWrap(false)
+    -- 대상 강조 테두리 기준값, dik, 2026-10-05
+    uf.borderToken = "BORDER"
 
     LayoutToT(uf)
     uf.hud:ApplySavedPosition()
@@ -1348,7 +1420,8 @@ local function OnSettingChanged(scope, key, value)
         return
     elseif key == "bgAlpha" then
         for i = 1, #frameList do
-            Theme.ApplyBackdrop(frameList[i].body, "BG", "BORDER", value)
+            -- 등급 테두리 색 유지, dik, 2026-10-05
+            Theme.ApplyBackdrop(frameList[i].body, "BG", frameList[i].borderToken or "BORDER", value)
         end
     elseif key == "showDurability" then
         local uf = frames.player
@@ -1374,3 +1447,8 @@ end
 ns.On("READY", Initialize)
 ns.On("SETTING_CHANGED", OnSettingChanged)
 ns.On("HUD_MOVE_MODE", OnMoveMode)
+-- 대상 강조 변경 시 대상·대상의 대상 재채움, dik, 2026-10-05
+ns.On("UNIT_MARK_CHANGED", function()
+    MarkAll("target")
+    MarkAll("targettarget")
+end)

@@ -1,2 +1,2 @@
-source=04e28ed
-version=0.1.39
+source=2e5c6b5
+version=0.1.40
