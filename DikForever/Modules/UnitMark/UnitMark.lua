@@ -4,7 +4,8 @@ local L = ns.L
 
 local MODULE_ID = "unitMark"
 local FIRE_DELAY = 0.5
-local WATCH_EVENTS = { "QUEST_LOG_UPDATE", "UNIT_QUEST_LOG_CHANGED", "UNIT_CLASSIFICATION_CHANGED" }
+-- 관계 변경 이벤트 감시 추가, dik, 2026-10-08
+local WATCH_EVENTS = { "QUEST_LOG_UPDATE", "UNIT_QUEST_LOG_CHANGED", "UNIT_CLASSIFICATION_CHANGED", "UNIT_FACTION" }
 local WHERE_KEYS = { hud = "onHud", nameplate = "onNameplate", tooltip = "onTooltip" }
 
 ns.UnitMark = ns.UnitMark or {}
@@ -233,6 +234,57 @@ function UM.GetClassBar(unit)
     return ns.ClassBarColor(classFile)
 end
 
+-- 호감도 값 분류(적대·중립), dik, 2026-10-08
+function UM.ReactionFromValue(reaction)
+    if ns.IsSecret(reaction) then
+        return nil
+    end
+    if type(reaction) ~= "number" then
+        return nil
+    end
+    if reaction ~= reaction or reaction == math.huge or reaction == -math.huge then
+        return nil
+    end
+    if reaction == 1 or reaction == 2 or reaction == 3 then
+        return "hostile"
+    end
+    if reaction == 4 then
+        return "neutral"
+    end
+    return nil
+end
+
+-- 이름표 NPC 이름 관계 색 토큰, dik, 2026-10-08
+function UM.GetNameReaction(unit)
+    if not IsUnitToken(unit) then
+        return nil
+    end
+    if not ns.IsModuleEnabled(MODULE_ID) or not ns.IsModuleSupported(MODULE_ID) then
+        return nil
+    end
+    if ns.GetSetting(MODULE_ID, "onNameplate") == false or ns.GetSetting(MODULE_ID, "reactionName") == false then
+        return nil
+    end
+    if IsPlayerUnit(unit) then
+        return nil
+    end
+    if not ns.HasAPI("UnitReaction") then
+        return nil
+    end
+    local ok, r = pcall(UnitReaction, unit, "player")
+    if not ok then
+        ReportOnce(r)
+        return nil
+    end
+    local kind = UM.ReactionFromValue(r)
+    if kind == "hostile" then
+        return "REACTION_HOSTILE"
+    elseif kind == "neutral" then
+        return "REACTION_NEUTRAL"
+    end
+    return nil
+end
+
 -- 부분별 사용 불가 사유, dik, 2026-10-05
 function UM.GetUnavailableReason(part)
     if part == "quest" then
@@ -248,6 +300,15 @@ function UM.GetUnavailableReason(part)
     elseif part == "nameplate" then
         if not ns.HasAPI("C_NamePlate.GetNamePlateForUnit") then
             return L.UNITMARK_UNAVAILABLE_NAMEPLATE
+        end
+    -- 관계 색 사용 불가 사유 분기 추가, dik, 2026-10-08
+    elseif part == "reaction" then
+        local reason = UM.GetUnavailableReason("nameplate")
+        if reason then
+            return reason
+        end
+        if not ns.HasAPI("UnitReaction") then
+            return L.UNITMARK_UNAVAILABLE_REACTION
         end
     end
     return nil
@@ -316,6 +377,9 @@ ns.RegisterModule({
         -- 플레이어 이름표 직업색 설정 추가, dik, 2026-10-05
         { key = "classBar", type = "checkbox", label = L.SETTING_UNITMARK_CLASSBAR, tooltip = L.SETTING_UNITMARK_CLASSBAR_TIP, default = true,
           unavailable = function() return ns.UnitMark.GetUnavailableReason("nameplate") end },
+        -- 이름표 이름 적대·중립 색 설정 추가, dik, 2026-10-08
+        { key = "reactionName", type = "checkbox", label = L.SETTING_UNITMARK_REACTION, tooltip = L.SETTING_UNITMARK_REACTION_TIP, default = true,
+          unavailable = function() return ns.UnitMark.GetUnavailableReason("reaction") end },
         { key = "onTooltip", type = "checkbox", label = L.SETTING_UNITMARK_TOOLTIP, tooltip = L.SETTING_UNITMARK_TOOLTIP_TIP, default = true },
     },
 })

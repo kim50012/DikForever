@@ -2,8 +2,8 @@
 ## Title: DikForever
 ## Notes: 개인용 통합 관리 도구
 ## Author: dik
-## Version: 0.1.41
-## X-Build: 55c8036
+## Version: 0.1.42
+## X-Build: 782b503
 ## SavedVariables: DikForeverDB
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## AddonCompartmentFunc: DikForever_OnAddonCompartmentClick

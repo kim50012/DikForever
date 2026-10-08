@@ -57,6 +57,9 @@ local COLORS = {
     RANK_ELITE = { 1.00, 0.82, 0.00, 1.00 },
     RANK_RARE = { 0.80, 0.85, 0.95, 1.00 },
     RANK_BOSS = { 1.00, 0.35, 0.10, 1.00 },
+    -- 이름표 이름 적대·중립 색 추가, dik, 2026-10-08
+    REACTION_HOSTILE = { 1.00, 0.20, 0.20, 1.00 },
+    REACTION_NEUTRAL = { 1.00, 1.00, 0.00, 1.00 },
 }
 
 local FONT_DEFS = {

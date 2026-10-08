@@ -1237,7 +1237,8 @@ ns.L = {
     -- 대상 강조 로케일, dik, 2026-10-05
     MODULE_UNITMARK = "대상 강조",
     -- 플레이어 이름표 직업색 설명 추가, dik, 2026-10-05
-    MODULE_UNITMARK_DESC = "퀘스트 대상 이름을 보라색으로, 정예·희귀·우두머리를 꼬리표와 테두리로, 플레이어 이름표 생명력 바를 직업색으로 표시합니다.",
+    -- 적대·중립 이름 색 설명 추가, dik, 2026-10-08
+    MODULE_UNITMARK_DESC = "퀘스트 대상 이름을 보라색으로, 정예·희귀·우두머리를 꼬리표와 테두리로, 플레이어 이름표 생명력 바를 직업색으로, 이름표의 적대·중립 NPC 이름을 붉은색·노란색으로 표시합니다.",
     SETTING_UNITMARK_QUEST = "퀘스트 대상 이름 보라색",
     SETTING_UNITMARK_QUEST_TIP = "진행 중인 퀘스트와 관련된 대상의 이름을 보라색·외곽선으로 표시합니다.",
     -- 퀘스트 대상 생명력 바 설정 문구 추가, dik, 2026-10-05
@@ -1252,6 +1253,9 @@ ns.L = {
     -- 플레이어 이름표 직업색 설정 문구 추가, dik, 2026-10-05
     SETTING_UNITMARK_CLASSBAR = "플레이어 이름표 직업색",
     SETTING_UNITMARK_CLASSBAR_TIP = "머리 위 이름표에서 플레이어(양 진영)의 생명력 바를 직업색으로 표시합니다. '이름표에 표시'가 켜져 있어야 합니다.",
+    -- 이름표 이름 적대·중립 색 설정 문구 추가, dik, 2026-10-08
+    SETTING_UNITMARK_REACTION = "이름표 이름 적대·중립 색",
+    SETTING_UNITMARK_REACTION_TIP = "머리 위 이름표에서 적대 NPC 이름은 붉은색, 중립 NPC 이름은 노란색으로 표시합니다. 퀘스트 대상 보라색보다 우선합니다. '이름표에 표시'가 켜져 있어야 합니다.",
     SETTING_UNITMARK_TOOLTIP = "툴팁에 표시",
     SETTING_UNITMARK_TOOLTIP_TIP = "마우스 툴팁 첫 줄(이름)을 퀘스트 대상이면 보라색으로 표시합니다.",
     UNITMARK_TAG_ELITE = "[정예]",
@@ -1261,4 +1265,6 @@ ns.L = {
     UNITMARK_UNAVAILABLE_QUEST = "이 클라이언트에서 퀘스트 대상 정보를 읽을 수 없습니다.",
     UNITMARK_UNAVAILABLE_RANK = "이 클라이언트에서 대상 등급 정보를 읽을 수 없습니다.",
     UNITMARK_UNAVAILABLE_NAMEPLATE = "이 클라이언트에서 이름표를 찾을 수 없습니다.",
+    -- 관계 정보 사용 불가 문구 추가, dik, 2026-10-08
+    UNITMARK_UNAVAILABLE_REACTION = "이 클라이언트에서 대상 관계 정보를 읽을 수 없습니다.",
 }

@@ -47,7 +47,8 @@ end
 local function CountActive()
     local n = 0
     for _, state in pairs(plates) do
-        if state.quest or state.barOn then
+        -- 이름 칠함 필드 nameOn 으로 변경, dik, 2026-10-08
+        if state.nameOn or state.barOn then
             n = n + 1
         end
     end
@@ -58,10 +59,14 @@ end
 local function PaintName(state)
     local fs = state.fs
     local saved = state.saved
-    if not fs or not saved then
+    -- 색 토큰 적용·외곽선은 nameOutline 일 때만, dik, 2026-10-08
+    if not fs or not saved or not state.nameColor then
         return
     end
-    fs:SetTextColor(Theme.GetColor("QUEST_TARGET"))
+    fs:SetTextColor(Theme.GetColor(state.nameColor))
+    if not state.nameOutline then
+        return
+    end
     if type(saved.face) == "string" and type(saved.size) == "number" then
         local _, _, flags = fs:GetFont()
         if ns.IsSecret(flags) or flags ~= NAME_FLAGS then
@@ -97,7 +102,10 @@ local function RestoreName(state)
     local fs = state.fs
     state.saved = nil
     state.fs = nil
-    state.quest = false
+    -- 이름 칠함 상태 필드 초기화, dik, 2026-10-08
+    state.nameOn = false
+    state.nameColor = nil
+    state.nameOutline = nil
     if not saved or not IsFontString(fs) then
         return
     end
@@ -146,9 +154,10 @@ local function OnTick(_, elapsed)
     local any = false
     -- 덮개 바 가시성 동기화 추가, dik, 2026-10-05
     for _, state in pairs(plates) do
-        if state.quest or state.barOn then
+        -- 이름 칠함 필드 nameOn 기준 재칠, dik, 2026-10-08
+        if state.nameOn or state.barOn then
             any = true
-            if state.quest then
+            if state.nameOn then
                 PaintName(state)
             end
             if state.barOn then
@@ -286,13 +295,22 @@ local function ApplyPlate(unit)
         cr, cg, cb = ns.UnitMark.GetClassBar(unit)
     end
     local hasClass = cr ~= nil
+    -- 이름 반응색 토큰 수신, dik, 2026-10-08
+    local reactionToken
+    if type(ns.UnitMark.GetNameReaction) == "function" then
+        reactionToken = ns.UnitMark.GetNameReaction(unit)
+        if type(reactionToken) ~= "string" then
+            reactionToken = nil
+        end
+    end
     local plate, fs, bar = ResolvePlate(unit)
     if not plate then
         return
     end
     local state = plates[plate]
     -- 바 강조도 강조 대상에 포함, dik, 2026-10-05
-    if not quest and not rank and not questBar and not hasClass then
+    -- 반응색 이름도 강조 대상에 포함, dik, 2026-10-08
+    if not quest and not rank and not questBar and not hasClass and not reactionToken then
         if state then
             RestorePlate(plate)
             state.unit = unit
@@ -301,21 +319,35 @@ local function ApplyPlate(unit)
         return
     end
     if not state then
-        state = { unit = unit, quest = false }
+        -- 이름 칠함 필드 nameOn 으로 변경, dik, 2026-10-08
+        state = { unit = unit, nameOn = false }
         plates[plate] = state
     end
     state.unit = unit
     EnsureParts(state, plate)
 
+    -- 이름 색 우선순위 반응색·퀘스트 보라 결정, dik, 2026-10-08
+    local nameColor, nameOutline
+    if reactionToken then
+        nameColor, nameOutline = reactionToken, false
+    elseif quest then
+        nameColor, nameOutline = "QUEST_TARGET", true
+    end
     if state.saved and state.fs ~= fs then
         RestoreName(state)
     end
-    if quest and fs then
+    -- 외곽선 방식 변경 시 원복 후 재칠, dik, 2026-10-08
+    if nameColor and fs then
+        if state.saved and state.nameOutline ~= nameOutline then
+            RestoreName(state)
+        end
         if not state.saved then
             CaptureName(state, fs)
         end
         if state.saved then
-            state.quest = true
+            state.nameOn = true
+            state.nameColor = nameColor
+            state.nameOutline = nameOutline
             PaintName(state)
         end
     elseif state.saved then
